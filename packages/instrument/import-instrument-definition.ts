@@ -1,5 +1,5 @@
 import { dialog, getCurrentWindow } from "@electron/remote";
-import { getFileNameWithoutExtension } from "eez-studio-shared/util-electron";
+import { getFileNameWithoutExtension } from "eez-studio-shared/util-web";
 import { IExtension } from "eez-studio-shared/extensions/extension";
 import { installExtension } from "eez-studio-shared/extensions/extensions";
 

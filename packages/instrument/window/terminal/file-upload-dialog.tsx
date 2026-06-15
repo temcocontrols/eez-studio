@@ -9,7 +9,7 @@ import {
     fileExists,
     isValidFileName,
     isValidPath
-} from "eez-studio-shared/util-electron";
+} from "eez-studio-shared/util-web";
 
 import { makeValidator, validators } from "eez-studio-shared/validation";
 

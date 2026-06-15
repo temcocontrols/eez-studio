@@ -20,7 +20,7 @@ import {
 } from "eez-studio-shared/units";
 import { Point } from "eez-studio-shared/geometry";
 import { IStore } from "eez-studio-shared/store";
-import { readBinaryFile } from "eez-studio-shared/util-electron";
+import { readBinaryFile } from "eez-studio-shared/util-web";
 
 import {
     ChartController,

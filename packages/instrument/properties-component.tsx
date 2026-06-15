@@ -5,7 +5,7 @@ import { observer } from "mobx-react";
 import {
     readJsObjectFromFile,
     writeJsObjectToFile
-} from "eez-studio-shared/util-electron";
+} from "eez-studio-shared/util-web";
 import { getExtensionFolderPath } from "eez-studio-shared/extensions/extension-folder";
 
 import { PropertyList } from "eez-studio-ui/properties";

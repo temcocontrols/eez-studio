@@ -17,7 +17,7 @@ import {
     getSdlSemanticTypeForResponse,
     getSdlResponseType
 } from "instrument/scpi";
-import { readTextFile } from "eez-studio-shared/util-electron";
+import { readTextFile } from "eez-studio-shared/util-web";
 import { CommandLineEnding } from "eez-studio-shared/extensions/extension";
 
 ////////////////////////////////////////////////////////////////////////////////

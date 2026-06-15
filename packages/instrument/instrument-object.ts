@@ -28,7 +28,7 @@ import {
     extensions
 } from "eez-studio-shared/extensions/extensions";
 import { objectEqual } from "eez-studio-shared/util";
-import { isRenderer } from "eez-studio-shared/util-electron";
+import { isRenderer } from "eez-studio-shared/util-web";
 import type { IUnit } from "eez-studio-shared/units";
 import { db } from "eez-studio-shared/db";
 

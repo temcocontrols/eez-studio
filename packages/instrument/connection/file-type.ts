@@ -4,7 +4,7 @@ const fileType = require("file-type");
 
 import * as notification from "eez-studio-ui/notification";
 
-import { getFileNameExtension } from "eez-studio-shared/util-electron";
+import { getFileNameExtension } from "eez-studio-shared/util-web";
 import { UNITS, PREFIXES } from "eez-studio-shared/units";
 
 import { IActivityLogEntry } from "instrument/window/history/activity-log";

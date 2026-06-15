@@ -7,7 +7,7 @@ import {
     readCsvFile,
     writeCsvFile,
     getValidFileNameFromFileName
-} from "eez-studio-shared/util-electron";
+} from "eez-studio-shared/util-web";
 import { stringCompare } from "eez-studio-shared/string";
 import { beginTransaction, commitTransaction } from "eez-studio-shared/store";
 import { formatDateTimeLong } from "eez-studio-shared/util";

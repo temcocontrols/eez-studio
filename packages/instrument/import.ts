@@ -12,7 +12,7 @@ import {
     isRenderer,
     writeBinaryData,
     writeJsObjectToFile
-} from "eez-studio-shared/util-electron";
+} from "eez-studio-shared/util-web";
 
 import type {
     CommandLineEnding,
