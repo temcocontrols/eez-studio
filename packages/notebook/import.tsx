@@ -7,7 +7,7 @@ import {
     readJsObjectFromFile,
     readBinaryFile,
     fileExists
-} from "eez-studio-shared/util-electron";
+} from "eez-studio-shared/util-web";
 import { db } from "eez-studio-shared/db";
 
 import { showGenericDialog } from "eez-studio-ui/generic-dialog";
