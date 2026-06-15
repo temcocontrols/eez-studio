@@ -28,12 +28,12 @@ import { App } from "home/app";
 
 // Import settings and extensions so side-effects run
 import "home/settings";
-import { layoutModels } from "eez-studio-ui/side-dock";
+import "eez-studio-ui/side-dock";
 
 import { initProjectEditor } from "project-editor/project-editor-bootstrap";
 
 // Import so LineMarkers are registered
-import { LineMarkers } from "project-editor/flow/connection-line/ConnectionLineComponent";
+import "project-editor/flow/connection-line/ConnectionLineComponent";
 
 configure({ enforceActions: "observed", useProxies: "always" });
 

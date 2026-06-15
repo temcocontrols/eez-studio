@@ -1,6 +1,6 @@
 import { values } from "mobx";
 
-import { isRenderer } from "eez-studio-shared/util-electron";
+import { isRenderer } from "eez-studio-shared/util-web";
 import { db } from "eez-studio-shared/db";
 import { sendMessage } from "eez-studio-shared/notify";
 import {
