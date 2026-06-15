@@ -13,7 +13,7 @@ import {
     fetchUrlOrReadFromCache,
     isDev,
     readJsObjectFromFile
-} from "eez-studio-shared/util-electron";
+} from "eez-studio-shared/util-web";
 
 import type { ITreeNode } from "eez-studio-ui/tree";
 

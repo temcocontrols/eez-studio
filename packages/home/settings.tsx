@@ -15,7 +15,8 @@ import * as FlexLayout from "flexlayout-react";
 import { ipcRenderer } from "eez-studio-shared/ipc";
 import { clipboard, shell } from "eez-studio-shared/platform";
 import { getBridgeAPI } from "eez-studio-shared/bridge";
-import { getUserDataPath, createEmptyFile } from "eez-studio-shared/util-web";
+import { createEmptyFile } from "eez-studio-shared/util-web";
+import { dirname, basename } from "eez-studio-shared/path-utils";
 import { confirm } from "eez-studio-ui/dialog-web";
 import { stringCompare } from "eez-studio-shared/string";
 import {
@@ -344,7 +345,7 @@ class SettingsController {
 
                     window.localStorage.setItem(
                         "lastDatabaseSavePath",
-                        path.dirname(filePath)
+                        dirname(filePath)
                     );
 
                     if (isActive) {
@@ -386,7 +387,7 @@ class SettingsController {
 
                 window.localStorage.setItem(
                     "lastDatabaseOpenPath",
-                    path.dirname(filePath)
+                    dirname(filePath)
                 );
 
                 if (isActive) {
@@ -508,11 +509,13 @@ const CompactDatabaseDialog = observer(
                                 this.sizeReduced =
                                     Math.round(100 * this.sizeReduced) / 100;
                             } else if (this.sizeReduced < 10) {
-                        this.sizeReduced =
-                            Math.round(10 * this.sizeReduced) / 10;
-                    } else {
-                        this.sizeReduced = Math.round(this.sizeReduced);
-                    }
+                                this.sizeReduced =
+                                    Math.round(10 * this.sizeReduced) / 10;
+                            } else {
+                                this.sizeReduced = Math.round(this.sizeReduced);
+                            }
+                        });
+                    });
                 });
             } catch (err) {
                 notification.error(err);
@@ -586,7 +589,7 @@ const DatabaseListItem = observer(
                         }}
                     >
                         {database.isActive ? "[ACTIVE] " : ""}
-                        {path.parse(database.filePath).name}
+                        {basename(database.filePath)}
                     </td>
                 </tr>
             );

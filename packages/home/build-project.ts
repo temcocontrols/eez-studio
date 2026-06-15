@@ -3,7 +3,6 @@ import { autorun } from "mobx";
 import { Message, ProjectStore, Section } from "project-editor/store";
 
 import { initProjectEditor } from "project-editor/project-editor-bootstrap";
-import { getBridgeAPI } from "eez-studio-shared/bridge";
 import { ipcRenderer } from "eez-studio-shared/ipc";
 
 export async function buildProject(filePath: string) {

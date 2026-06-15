@@ -9,7 +9,7 @@ import { sourceRootDir } from "eez-studio-shared/util";
 
 import { ComponentInfo, ParentComponentInfo } from "./component-info";
 import { getModel } from "./model";
-import { isDev } from "eez-studio-shared/util-electron";
+import { isDev } from "eez-studio-shared/util-web";
 import { ProjectEditor } from "project-editor/project-editor-interface";
 import { generateLVGLActionsMarkdown } from "project-editor/lvgl/actions";
 

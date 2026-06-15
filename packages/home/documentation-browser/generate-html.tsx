@@ -3,7 +3,7 @@ import { resolve } from "path";
 import { createRoot } from "react-dom/client";
 import fs from "fs";
 
-import { copyDir } from "eez-studio-shared/util-electron";
+import { copyDir } from "eez-studio-shared/util-web";
 
 import * as notification from "eez-studio-ui/notification";
 

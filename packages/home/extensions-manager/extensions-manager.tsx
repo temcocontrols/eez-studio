@@ -37,7 +37,7 @@ import {
     getTempFilePath,
     getValidFileNameFromFileName,
     writeBinaryData
-} from "eez-studio-shared/util-electron";
+} from "eez-studio-shared/util-web";
 import { stringCompare } from "eez-studio-shared/string";
 
 import {
