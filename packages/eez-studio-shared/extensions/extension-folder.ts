@@ -1,4 +1,4 @@
-import { getUserDataPath } from "eez-studio-shared/util-electron";
+import { getUserDataPath } from "eez-studio-shared/util-web";
 import { EXTENSIONS_FOLDER_NAME } from "eez-studio-shared/conf";
 import { sourceRootDir } from "eez-studio-shared/util";
 

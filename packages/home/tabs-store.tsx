@@ -1,6 +1,3 @@
-import fs from "fs";
-import { clipboard, ipcRenderer } from "electron";
-import { getCurrentWindow } from "@electron/remote";
 import React from "react";
 import {
     observable,
@@ -12,7 +9,10 @@ import {
     makeObservable,
     IReactionDisposer
 } from "mobx";
-import * as path from "path";
+
+import { ipcRenderer } from "eez-studio-shared/ipc";
+import { clipboard, getCurrentWindow } from "eez-studio-shared/platform";
+import { getBridgeAPI } from "eez-studio-shared/bridge";
 
 import { dockerBuildState } from "project-editor/lvgl/docker-build/docker-build-state";
 
@@ -796,10 +796,10 @@ export class ProjectEditorTab implements IHomeTab {
 
         if (this.filePath) {
             if (this.filePath.endsWith(".eez-project")) {
-                return path.basename(this.filePath, ".eez-project");
+                return this.filePath.replace(/^.*[\\/]/, "").replace(/\.eez-project$/, "");
             }
             return (
-                path.basename(this.filePath, ".eez-dashboard") + " dashboard"
+                this.filePath.replace(/^.*[\\/]/, "").replace(/\.eez-dashboard$/, "") + " dashboard"
             );
         }
 
@@ -845,9 +845,8 @@ export class ProjectEditorTab implements IHomeTab {
                         return;
                     }
                 } else {
-                    jsonStr = await fs.promises.readFile(
-                        this.filePath,
-                        "utf-8"
+                    jsonStr = await getBridgeAPI().readTextFile(
+                        this.filePath
                     );
                 }
 

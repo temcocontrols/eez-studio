@@ -216,7 +216,12 @@ export function remap(
 }
 
 export function sourceRootDir() {
-    return __dirname + "/..";
+    // In browser mode, the source root is the virtual project root.
+    // Node.js __dirname is not available in browser — return a virtual path.
+    if (typeof __dirname !== "undefined") {
+        return __dirname + "/..";
+    }
+    return "/eez-studio";
 }
 
 ////////////////////////////////////////////////////////////////////////////////

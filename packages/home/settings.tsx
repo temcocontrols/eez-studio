@@ -1,8 +1,3 @@
-import fs from "fs";
-import { ipcRenderer, shell, clipboard } from "electron";
-import { dialog, getCurrentWindow } from "@electron/remote";
-import { confirm } from "eez-studio-ui/dialog-electron";
-import path from "path";
 import React from "react";
 import {
     observable,
@@ -17,7 +12,11 @@ import { observer } from "mobx-react";
 import classNames from "classnames";
 import * as FlexLayout from "flexlayout-react";
 
-import { app, createEmptyFile } from "eez-studio-shared/util-electron";
+import { ipcRenderer } from "eez-studio-shared/ipc";
+import { clipboard, shell } from "eez-studio-shared/platform";
+import { getBridgeAPI } from "eez-studio-shared/bridge";
+import { getUserDataPath, createEmptyFile } from "eez-studio-shared/util-web";
+import { confirm } from "eez-studio-ui/dialog-web";
 import { stringCompare } from "eez-studio-shared/string";
 import {
     initInstrumentDatabase,
@@ -324,7 +323,7 @@ class SettingsController {
     createNewDatabase = async () => {
         let defaultPath = window.localStorage.getItem("lastDatabaseSavePath");
 
-        const result = await dialog.showSaveDialog(getCurrentWindow(), {
+        const result = await getBridgeAPI().showSaveDialog({
             filters: [
                 { name: "DB files", extensions: ["db"] },
                 { name: "All Files", extensions: ["*"] }
@@ -332,7 +331,7 @@ class SettingsController {
             defaultPath: defaultPath ?? undefined
         });
 
-        const filePath = result.filePath;
+        const filePath = result;
 
         if (filePath) {
             try {
@@ -368,7 +367,7 @@ class SettingsController {
     openDatabase = async () => {
         let defaultPath = window.localStorage.getItem("lastDatabaseOpenPath");
 
-        const result = await dialog.showOpenDialog(getCurrentWindow(), {
+        const result = await getBridgeAPI().showOpenDialog({
             properties: ["openFile"],
             filters: [
                 { name: "DB files", extensions: ["db"] },
@@ -377,7 +376,7 @@ class SettingsController {
             defaultPath: defaultPath ?? undefined
         });
 
-        const filePaths = result.filePaths;
+        const filePaths = result;
 
         if (filePaths && filePaths[0]) {
             const filePath = filePaths[0];
@@ -419,8 +418,7 @@ class SettingsController {
     };
 
     restart = () => {
-        app.relaunch();
-        app.exit();
+        location.reload();
     };
 
     setAsActiveDatabase = action(() => {
@@ -481,7 +479,10 @@ const CompactDatabaseDialog = observer(
                 sizeReduced: observable
             });
 
-            this.sizeBefore = fs.statSync(this.props.database.filePath).size;
+            this.sizeBefore = 0;
+            getBridgeAPI().getFileSize(this.props.database.filePath).then(size => {
+                runInAction(() => { this.sizeBefore = size; });
+            });
         }
 
         async componentDidMount() {
@@ -494,21 +495,19 @@ const CompactDatabaseDialog = observer(
                 });
 
                 runInAction(() => {
-                    var fs = require("fs");
-
-                    this.sizeAfter = fs.statSync(
+                    getBridgeAPI().getFileSize(
                         this.props.database.filePath
-                    ).size;
-
-                    this.props.database.databaseSize = this.sizeAfter!;
-
-                    this.sizeReduced =
-                        (100 * (this.sizeBefore - this.sizeAfter!)) /
-                        this.sizeBefore;
-                    if (this.sizeReduced < 1) {
-                        this.sizeReduced =
-                            Math.round(100 * this.sizeReduced) / 100;
-                    } else if (this.sizeReduced < 10) {
+                    ).then(fileSize => {
+                        runInAction(() => {
+                            this.sizeAfter = fileSize;
+                            this.props.database.databaseSize = this.sizeAfter!;
+                            this.sizeReduced =
+                                (100 * (this.sizeBefore - this.sizeAfter!)) /
+                                this.sizeBefore;
+                            if (this.sizeReduced < 1) {
+                                this.sizeReduced =
+                                    Math.round(100 * this.sizeReduced) / 100;
+                            } else if (this.sizeReduced < 10) {
                         this.sizeReduced =
                             Math.round(10 * this.sizeReduced) / 10;
                     } else {
@@ -825,23 +824,34 @@ const PythonSettings = observer(
         constructor(props: any) {
             super(props);
 
-            const { PythonShell } =
-                require("python-shell") as typeof import("python-shell");
+            // PythonShell is not available in browser — skip Python detection
+            if (typeof window !== "undefined" && !(window as any).require) {
+                this.pythonPathError = false;
+                this.pythonPath = "";
+            } else {
+                try {
+                    const { PythonShell } =
+                        require("python-shell") as typeof import("python-shell");
 
-            PythonShell.runString(
-                "import sys;print(sys.executable)",
-                undefined,
-                action((err, output) => {
-                    if (err) {
-                        console.log(err);
-                        this.pythonPathError = true;
-                    } else if (!output) {
-                        this.pythonPathError = true;
-                    } else {
-                        this.pythonPath = output[0];
-                    }
-                })
-            );
+                    PythonShell.runString(
+                        "import sys;print(sys.executable)",
+                        undefined,
+                        action((err, output) => {
+                            if (err) {
+                                console.log(err);
+                                this.pythonPathError = true;
+                            } else if (!output) {
+                                this.pythonPathError = true;
+                            } else {
+                                this.pythonPath = output[0];
+                            }
+                        })
+                    );
+                } catch (e) {
+                    this.pythonPathError = false;
+                    this.pythonPath = "";
+                }
+            }
 
             makeObservable(this, {
                 pythonPath: observable,
@@ -906,12 +916,12 @@ class AbsoluteDirectoryInputProperty extends React.Component<
     {}
 > {
     onSelect = async () => {
-        const result = await dialog.showOpenDialog(getCurrentWindow(), {
+        const result = await getBridgeAPI().showOpenDialog({
             properties: ["openDirectory"]
         });
 
-        if (result.filePaths && result.filePaths[0]) {
-            this.props.onChange(result.filePaths[0]);
+        if (result && result[0]) {
+            this.props.onChange(result[0]);
         }
     };
 

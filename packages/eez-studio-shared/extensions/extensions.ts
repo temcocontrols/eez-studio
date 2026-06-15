@@ -1,6 +1,5 @@
 import { observable, action } from "mobx";
 import { EventEmitter } from "events";
-import fs from "fs";
 
 import { delay } from "eez-studio-shared/util";
 import {
@@ -12,7 +11,9 @@ import {
     removeFolder,
     renameFile,
     readFolder
-} from "eez-studio-shared/util-electron";
+} from "eez-studio-shared/util-web";
+import { getBridgeAPI } from "eez-studio-shared/bridge";
+import { basename } from "eez-studio-shared/path-utils";
 import { guid } from "eez-studio-shared/guid";
 import { firstWord } from "eez-studio-shared/string";
 
@@ -195,18 +196,19 @@ export async function loadExtensions(nodeModuleFolders: string[]) {
     try {
         installedExtensionFolders = await readFolder(extensionsFolderPath);
 
-        installedExtensionFolders = installedExtensionFolders.filter(
-            extensionFolderPath => {
-                if (fs.lstatSync(extensionFolderPath).isFile()) {
-                    return false;
-                }
-                const basename = path.basename(extensionFolderPath);
-                if (basename == "node_modules" || basename == "cache") {
-                    return false;
-                }
-                return true;
+        const filtered: string[] = [];
+        for (const extensionFolderPath of installedExtensionFolders) {
+            const isDir = await getBridgeAPI().isDirectory(extensionFolderPath);
+            if (!isDir) {
+                continue;
             }
-        );
+            const name = basename(extensionFolderPath);
+            if (name == "node_modules" || name == "cache") {
+                continue;
+            }
+            filtered.push(extensionFolderPath);
+        }
+        installedExtensionFolders = filtered;
     } catch (err) {
         console.info(
             `Extensions folder "${extensionsFolderPath}" doesn't exists.`
@@ -542,7 +544,8 @@ export async function exportExtension(
 
     return new Promise<void>((resolve, reject) => {
         let extensionFolderPath = getExtensionFolderPath(extension.id);
-        var output = fs.createWriteStream(destFilePath);
+
+        const chunks: Buffer[] = [];
 
         var archive = archiver.default("zip", {
             zlib: {
@@ -550,8 +553,21 @@ export async function exportExtension(
             }
         });
 
-        output.on("close", function () {
-            resolve();
+        archive.on("data", (chunk: Buffer) => {
+            chunks.push(chunk);
+        });
+
+        archive.on("end", async () => {
+            try {
+                const buffer = Buffer.concat(chunks);
+                await getBridgeAPI().writeFile(
+                    destFilePath,
+                    buffer.buffer
+                );
+                resolve();
+            } catch (err) {
+                reject(err);
+            }
         });
 
         archive.on("warning", function (err: any) {
@@ -561,8 +577,6 @@ export async function exportExtension(
         archive.on("error", function (err: any) {
             reject(err);
         });
-
-        archive.pipe(output);
 
         archive.glob(
             "**/*",

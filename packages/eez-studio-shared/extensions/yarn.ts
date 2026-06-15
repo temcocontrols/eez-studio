@@ -1,6 +1,6 @@
-import path from "path";
+import * as path from "eez-studio-shared/path-utils";
 
-import { fileExists, makeFolder } from "eez-studio-shared/util-electron";
+import { fileExists, makeFolder } from "eez-studio-shared/util-web";
 
 import { sourceRootDir } from "eez-studio-shared/util";
 

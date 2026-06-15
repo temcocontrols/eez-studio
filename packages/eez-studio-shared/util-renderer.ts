@@ -1,13 +1,7 @@
-import { dialog, BrowserWindow, getCurrentWindow } from "@electron/remote";
-import { ipcRenderer } from "electron";
+import { ipcRenderer } from "eez-studio-shared/ipc";
 
 function mnemonicLabel(label: string): string {
-    const os = require("os");
-
-    if (os.platform() != "win32") {
-        return label.replace(/\(&&\w\)|&&/g, ""); // no mnemonic support on mac/linux
-    }
-
+    // In browser, we always use Windows-style mnemonic support
     return label.replace(/&&/g, "&");
 }
 
