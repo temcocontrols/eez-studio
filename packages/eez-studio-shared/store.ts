@@ -5,7 +5,7 @@ import type { Database } from "better-sqlite3";
 
 import { db } from "eez-studio-shared/db";
 import { watch, sendMessage, registerSource } from "eez-studio-shared/notify";
-import { isRenderer } from "eez-studio-shared/util-electron";
+import { isRenderer } from "eez-studio-shared/util-web";
 
 import { isArray } from "eez-studio-shared/util";
 

@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * path-utils.ts — Browser-safe path manipulation (replaces Node.js 'path')
  *

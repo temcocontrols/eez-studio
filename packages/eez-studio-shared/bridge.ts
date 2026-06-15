@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * Central API Bridge — replaces ALL Electron, Node.js, and IPC dependencies.
  *

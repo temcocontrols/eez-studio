@@ -11,7 +11,7 @@ export {
 } from "eez-studio-shared/validation-filters";
 
 import { isArray } from "eez-studio-shared/util";
-import { isValidPath } from "./util-electron";
+import { isValidPath } from "./util-web";
 
 const VALIDATION_MESSAGE_INVALID_VALUE = "Invalid value.";
 export const VALIDATION_MESSAGE_REQUIRED = "Please fill out this field.";

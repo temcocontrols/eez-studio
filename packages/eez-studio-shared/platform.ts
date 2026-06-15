@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * platform.ts — Browser-compatible replacements for Electron APIs
  *

@@ -48,7 +48,7 @@ async function loadExtension(
     let packageJsonFilePath = extensionFolderPath + "/" + "package.json";
     if (await fileExists(packageJsonFilePath)) {
         try {
-            const packageJson = await readJsObjectFromFile(packageJsonFilePath);
+            const packageJson: any = await readJsObjectFromFile(packageJsonFilePath);
             const packageJsonEezStudio =
                 packageJson[CONF_EEZ_STUDIO_PROPERTY_NAME];
             if (packageJsonEezStudio) {

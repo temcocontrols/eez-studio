@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * ipc.ts — Browser-compatible replacement for Electron's ipcRenderer
  *

@@ -1,6 +1,6 @@
 import { ipcRenderer } from "electron";
 
-import { isRenderer } from "eez-studio-shared/util-electron";
+import { isRenderer } from "eez-studio-shared/util-web";
 
 export const LOCALES = {
     af: "Afrikaans",

@@ -10,7 +10,7 @@ import {
     toJS
 } from "mobx";
 
-import { createEmptyFile, isRenderer } from "eez-studio-shared/util-electron";
+import { createEmptyFile, isRenderer } from "eez-studio-shared/util-web";
 
 import type * as MainSettingsModule from "main/settings";
 import { allStores } from "eez-studio-shared/store";
