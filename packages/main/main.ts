@@ -15,6 +15,7 @@ import type * as HomeWindowModule from "main/home-window";
 import { unloadVisa } from "instrument/connection/interfaces/visa-dll";
 import { setup } from "main/setup";
 import { HOME_WINDOW_URL } from "main/home-window";
+import { initElectronBridge } from "main/bridge-setup";
 
 // disable security warnings inside dev console
 process.env["ELECTRON_DISABLE_SECURITY_WARNINGS"] = true as any;
@@ -76,6 +77,8 @@ app.on("ready", async function () {
 
     const { loadSettings } = await import("main/settings");
     await loadSettings();
+
+    initElectronBridge();
 
     await setup();
 
