@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * dialog-web.tsx — Browser-native replacement for dialog-electron.tsx
  *

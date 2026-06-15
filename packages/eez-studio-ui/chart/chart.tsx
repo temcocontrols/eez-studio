@@ -24,7 +24,7 @@ import { IUnit, UNITS, UNKNOWN_UNIT } from "eez-studio-shared/units";
 import { Point, pointDistance } from "eez-studio-shared/geometry";
 import { guid } from "eez-studio-shared/guid";
 import { capitalize, stringCompare } from "eez-studio-shared/string";
-import { writeBinaryData } from "eez-studio-shared/util-electron";
+import { writeBinaryData } from "eez-studio-shared/util-web";
 import { scrollIntoViewIfNeeded } from "eez-studio-shared/dom";
 
 import { SvgLabel } from "eez-studio-ui/svg-label";
