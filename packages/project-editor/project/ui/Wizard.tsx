@@ -23,7 +23,7 @@ import {
     fetchUrlOrReadFromCache,
     getHomePath,
     readJsObjectFromFile
-} from "eez-studio-shared/util-electron";
+} from "eez-studio-shared/util-web";
 import { guid } from "eez-studio-shared/guid";
 import { stringCompare } from "eez-studio-shared/string";
 

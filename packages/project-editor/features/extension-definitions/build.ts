@@ -1,6 +1,6 @@
 import { toJS } from "mobx";
 
-import { makeFolder } from "eez-studio-shared/util-electron";
+import { makeFolder } from "eez-studio-shared/util-web";
 
 import type { IdfProperties as InstrumentIdfProperties } from "instrument/export";
 

@@ -1,4 +1,4 @@
-import { readTextFile } from "eez-studio-shared/util-electron";
+import { readTextFile } from "eez-studio-shared/util-web";
 import { computed, makeObservable, observable, runInAction, toJS } from "mobx";
 import path from "path";
 import {

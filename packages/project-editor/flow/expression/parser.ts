@@ -2,7 +2,7 @@ import { readFileSync } from "fs";
 import { resolve } from "path";
 import peggy from "peggy";
 
-import { isDev } from "eez-studio-shared/util-electron";
+import { isDev } from "eez-studio-shared/util-web";
 import { sourceRootDir } from "eez-studio-shared/util";
 
 const expressionParserGrammar = readFileSync(

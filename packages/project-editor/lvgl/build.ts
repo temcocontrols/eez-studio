@@ -1,4 +1,4 @@
-import * as path from "eez-studio-shared/path-utils";
+import { resolve } from "eez-studio-shared/path-utils";
 import { getBridgeAPI } from "eez-studio-shared/bridge";
 import {
     NamingConvention,

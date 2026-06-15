@@ -5,7 +5,7 @@ import {
     fileExists,
     readJsObjectFromFile,
     writeJsObjectToFile
-} from "eez-studio-shared/util-electron";
+} from "eez-studio-shared/util-web";
 
 import * as notification from "eez-studio-ui/notification";
 

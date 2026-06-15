@@ -17,7 +17,7 @@ import classNames from "classnames";
 import DatabaseConstructor from "better-sqlite3";
 import { confirm } from "eez-studio-ui/dialog-electron";
 
-import { getUserDataPath } from "eez-studio-shared/util-electron";
+import { getUserDataPath } from "eez-studio-shared/util-web";
 import { guid } from "eez-studio-shared/guid";
 
 import { showDialog } from "eez-studio-ui/dialog";

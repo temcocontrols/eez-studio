@@ -35,7 +35,7 @@ export async function initProjectEditor(
 /*
 import { LVGLMeterIndicator } from "project-editor/lvgl/widgets";
 
-import { isDev, writeTextFile } from "eez-studio-shared/util-electron";
+import { isDev, writeTextFile } from "eez-studio-shared/util-web";
 import {
     EezClass,
     PropertyInfo,
