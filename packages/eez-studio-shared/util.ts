@@ -166,7 +166,9 @@ export async function delay(time: number) {
     return new Promise(resolve => setTimeout(resolve, time));
 }
 
-export const studioVersion = require("../../package.json").version;
+// Vite replaces JSON imports at build time
+import pkg from "../../package.json";
+export const studioVersion: string = (pkg as any).version || "0.0.0";
 
 export function compareVersions(v1: string, v2: string) {
     const v1Parts = v1.toString().split(".");

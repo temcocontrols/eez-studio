@@ -236,7 +236,7 @@ ipc.on("notify/get-targets", function (event: any, windowId: number) {
 
 if (isRenderer()) {
     const { getCurrentWindow } =
-        require("@electron/remote") as typeof ElectronRemoteModule;
+        await import("@electron/remote");
 
     let currentWindowId = getCurrentWindow().id;
 

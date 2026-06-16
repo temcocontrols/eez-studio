@@ -5,12 +5,10 @@ import peggy from "peggy";
 import { isDev } from "eez-studio-shared/util-web";
 import { sourceRootDir } from "eez-studio-shared/util";
 
-const expressionParserGrammar = readFileSync(
-    isDev
-        ? resolve(`${sourceRootDir()}/../resources/expression-grammar.pegjs`)
-        : process.resourcesPath! + "/expression-grammar.pegjs",
-    "utf8"
-);
+// Vite ?raw import — embeds grammar at build time
+import grammarRaw from "../../../../resources/expression-grammar.pegjs?raw";
+
+const expressionParserGrammar = grammarRaw;
 
 const peggyParser = peggy.generate(expressionParserGrammar, {
     cache: true,
