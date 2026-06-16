@@ -261,6 +261,8 @@ class SettingsController {
         const content = document.getElementById(
             "EezStudio_Content"
         ) as HTMLDivElement;
+        if (!content) return;
+
         content.style.opacity = "0";
 
         const body = document.querySelector("#EezStudio_Content>.EezStudio_HeaderWithBody>.EezStudio_Body");
