@@ -92,6 +92,21 @@ function getActionIdToActionName() {
     return _actionIdToActionName;
 }
 
+// Placeholder: LVGLActionType not yet declared during circular import evaluation.
+// After the real class is declared, it replaces this placeholder.
+var _LVGLActionBase: any;
+function getLVGLActionBase() {
+    if (!_LVGLActionBase) {
+        if (EezObject && EezObject.classInfo) {
+            _LVGLActionBase = EezObject;
+        } else {
+            // Circular import: EezObject.classInfo not ready; use minimal stub
+            _LVGLActionBase = class { static classInfo: any = { properties: [] } };
+        }
+    }
+    return _LVGLActionBase;
+}
+
 export const actionDefinitions: IActionDefinition[] = getActionDefinitions() as any;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -436,8 +451,8 @@ export function registerAction(actionDefinition: IActionDefinition) {
 
     const actionDisplayName = getActionDisplayName(actionDefinition);
 
-    const actionClass = class extends LVGLActionType {
-        static classInfo = makeDerivedClassInfo(LVGLActionType.classInfo, {
+    const actionClass = class extends getLVGLActionBase() {
+        static classInfo = makeDerivedClassInfo((getLVGLActionBase() as any).classInfo, {
             properties,
             label: () => actionDisplayName,
             defaultValue,
@@ -1023,7 +1038,7 @@ export class LVGLActionType extends EezObject {
         getClass: function (projectStore: ProjectStore, jsObject: any) {
             if (jsObject.action == "ObjectSetX") jsObject.action = "objSetX";
 
-            const actionClass = actionClasses.get(jsObject.action);
+            const actionClass = getActionClasses().get(jsObject.action);
             if (actionClass) {
                 return actionClass;
             }
@@ -1042,7 +1057,7 @@ export class LVGLActionType extends EezObject {
                     return `Action #${actions.indexOf(object) + 1}`;
                 },
                 type: PropertyType.Enum,
-                enumItems: [...actionClasses.keys()].map(id => ({
+                enumItems: [...getActionClasses().keys()].map(id => ({
                     id
                 })),
                 enumDisallowUndefined: true,
@@ -1065,7 +1080,7 @@ export class LVGLActionType extends EezObject {
 
             let actionTypeObject;
 
-            const ActionClass = actionClasses.get(action)!;
+            const ActionClass = getActionClasses().get(action)!;
 
             actionTypeObject = createObject<LVGLActionType>(
                 project._store,
@@ -1227,6 +1242,9 @@ export class LVGLActionType extends EezObject {
             }));
     }
 }
+
+// Sync the placeholder used by registerAction for circular import safety
+_LVGLActionBase = LVGLActionType as any;
 
 ////////////////////////////////////////////////////////////////////////////////
 

@@ -1,5 +1,5 @@
 import { toJS, isObservableArray } from "mobx";
-import type MomentModule from "moment";
+import moment_lib from "moment";
 import stringify from "json-stable-stringify";
 
 import type * as GeometryModule from "eez-studio-shared/geometry";
@@ -96,9 +96,9 @@ export function clamp(value: number, min: number, max: number) {
     return value;
 }
 
-var moment: typeof MomentModule | undefined;
+var moment: any;
 var userLocale: string;
-var localeData: MomentModule.Locale;
+var localeData: any;
 var localeWeekdays: string[];
 var defaultDateFormat: string;
 var defaultTimeFormat: string;
@@ -107,25 +107,25 @@ var defaultDateTimeFormat: string;
 export function getMoment() {
     if (!moment) {
         try {
-            moment = require("moment") as typeof MomentModule;
-            if (moment) {
+            moment = moment_lib as any;
+            if (moment && typeof moment.localeData === "function") {
                 try {
                     const mdf = require("moment-duration-format");
-                    (mdf.default || mdf)(moment);
+                    const setupFn = (mdf && (mdf as any).default) || mdf;
+                    if (typeof setupFn === "function") setupFn(moment);
                 } catch (_) { /* moment-duration-format optional */ }
                 const { getLocale, getDateFormat, getTimeFormat } =
                     require("eez-studio-shared/i10n") as typeof I10nModule;
-                userLocale = getLocale();
+                userLocale = typeof getLocale === "function" ? getLocale() : "en";
                 localeData = moment.localeData(userLocale);
                 localeWeekdays = localeData.weekdays();
                 moment.locale(userLocale);
-                defaultDateFormat = getDateFormat();
-                defaultTimeFormat = getTimeFormat();
+                defaultDateFormat = typeof getDateFormat === "function" ? getDateFormat() : "YYYY-MM-DD";
+                defaultTimeFormat = typeof getTimeFormat === "function" ? getTimeFormat() : "HH:mm:ss";
                 defaultDateTimeFormat = defaultDateFormat + " " + defaultTimeFormat;
             }
         } catch (e) {
             console.error("Failed to load moment.js:", e);
-            moment = null as any;
         }
     }
     return moment;
