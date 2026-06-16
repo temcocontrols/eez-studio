@@ -34,8 +34,11 @@ import type { HistoryViewComponent } from "instrument/window/history/history-vie
 import type * as HistoryViewModule from "instrument/window/history/history-view";
 
 import type * as HomeTabModule from "home/home-tab";
+// Real import needed for Vite ESM — Home and Shortcuts have no circular dep on tabs-store
+import { Home } from "home/home-tab";
 import type * as HistoryModule from "home/history";
 import type * as ShortcutsModule from "home/shortcuts";
+import { ShortcutsAndGroups } from "home/shortcuts";
 
 import { Loader } from "eez-studio-ui/loader";
 
@@ -99,7 +102,6 @@ export class HomeTab implements IHomeTab {
     }
 
     render() {
-        const { Home } = require("home/home-tab") as typeof HomeTabModule;
         return <Home />;
     }
 
@@ -233,8 +235,6 @@ class ShortcutsAndGroupsTab implements IHomeTab {
     }
 
     render() {
-        const { ShortcutsAndGroups } =
-            require("home/shortcuts") as typeof ShortcutsModule;
         return <ShortcutsAndGroups />;
     }
 

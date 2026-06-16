@@ -17,6 +17,10 @@
 
 /// <reference path="./home/globals.d.ts"/>
 
+// EEZ Studio CSS (from the eez-studio fork build directory, aliased in quasar.config.js)
+import "@eez-studio-build/eez-studio-ui/_stylesheets/main.css";
+import "@eez-studio-build/eez-studio-ui/_stylesheets/main-dark.css";
+
 import React from "react";
 import { createRoot } from "react-dom/client";
 import { configure } from "mobx";
@@ -63,9 +67,9 @@ export async function createEezStudioApp(
     container: HTMLElement
 ): Promise<EezStudioAppHandle> {
     // Load pre-installed extensions (empty array = no extra paths)
-    await loadExtensions([]);
+    try { await loadExtensions([]); } catch (e) { console.warn("loadExtensions failed:", e); }
 
-    await initProjectEditor(undefined, undefined as any);
+    try { await initProjectEditor(undefined, undefined as any); } catch (e) { console.warn("initProjectEditor failed:", e); }
 
     // Restore previously open tabs from local storage
     loadTabs();

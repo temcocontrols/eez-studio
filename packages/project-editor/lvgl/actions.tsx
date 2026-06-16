@@ -67,6 +67,33 @@ import { IListNode, List, ListContainer, ListItem } from "eez-studio-ui/list";
 import { ColorFormat, ColorFormatType } from "project-editor/features/style/color-format";
 import { lvglProperties, LVGLPropertiesGroup, LVGLPropertyInfo } from "project-editor/lvgl/style-catalog";
 
+// Must be at top of module — var is hoisted as undefined, registerAction lazily
+// initializes it if called during circular import evaluation (before this line runs).
+// actionDefinitions export syncs to this after module init completes.
+var _actionDefs: IActionDefinition[] | undefined;
+var _actionClasses: Map<string, typeof LVGLActionType> | undefined;
+var _actionNameToActionId: Map<string, number> | undefined;
+var _actionIdToActionName: Map<number, string> | undefined;
+
+export function getActionDefinitions(): IActionDefinition[] {
+    if (!_actionDefs) _actionDefs = [];
+    return _actionDefs;
+}
+function getActionClasses() {
+    if (!_actionClasses) _actionClasses = new Map();
+    return _actionClasses;
+}
+function getActionNameToActionId() {
+    if (!_actionNameToActionId) _actionNameToActionId = new Map();
+    return _actionNameToActionId;
+}
+function getActionIdToActionName() {
+    if (!_actionIdToActionName) _actionIdToActionName = new Map();
+    return _actionIdToActionName;
+}
+
+export const actionDefinitions: IActionDefinition[] = getActionDefinitions() as any;
+
 ////////////////////////////////////////////////////////////////////////////////
 
 type LvglActionPropertyType =
@@ -141,11 +168,6 @@ export interface IActionDefinition {
     disabled?: (project: Project) => string | false;
 }
 
-export const actionDefinitions: IActionDefinition[] = [];
-const actionClasses = new Map<string, typeof LVGLActionType>();
-const actionNameToActionId = new Map<string, number>();
-const actionIdToActionName = new Map<number, string>();
-
 function getActionDisplayName(actionDefinition: IActionDefinition) {
     return (actionDefinition.displayName || humanize(actionDefinition.name))
         .split(" ")
@@ -210,17 +232,17 @@ function getStyleProperty(actionType: LVGLActionType) {
 }
 
 export function registerAction(actionDefinition: IActionDefinition) {
-    actionDefinitions.push(actionDefinition);
+    getActionDefinitions().push(actionDefinition);
 
-    if (actionNameToActionId.has(actionDefinition.name)) {
+    if (getActionNameToActionId().has(actionDefinition.name)) {
         throw "duplicate LVGL action name";
     }
-    if (actionIdToActionName.has(actionDefinition.id)) {
+    if (getActionIdToActionName().has(actionDefinition.id)) {
         throw "duplicate LVGL action name";
     }
 
-    actionNameToActionId.set(actionDefinition.name, actionDefinition.id);
-    actionIdToActionName.set(actionDefinition.id, actionDefinition.name);
+    getActionNameToActionId().set(actionDefinition.name, actionDefinition.id);
+    getActionIdToActionName().set(actionDefinition.id, actionDefinition.name);
 
     const properties: PropertyInfo[] = [];
 
@@ -711,7 +733,7 @@ export function registerAction(actionDefinition: IActionDefinition) {
         }
     };
 
-    actionClasses.set(actionDefinition.name, actionClass);
+    getActionClasses().set(actionDefinition.name, actionClass);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -766,7 +788,7 @@ class NewLVGLActionDialogState {
     get groups() {
         const groups: string[] = [];
 
-        for (const actionDefinition of actionDefinitions) {
+        for (const actionDefinition of getActionDefinitions()) {
             if (
                 this.searchFilteredActionDefinitions.indexOf(
                     actionDefinition
@@ -808,7 +830,7 @@ class NewLVGLActionDialogState {
     }
 
     get searchFilteredActionDefinitions() {
-        return actionDefinitions.filter(actionDefinition => {
+        return getActionDefinitions().filter(actionDefinition => {
             if (actionDefinition.disabled) {
                 if (actionDefinition.disabled(this.project) !== false) {
                     return false;

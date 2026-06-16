@@ -127,7 +127,11 @@ const Tabs = observer(
 
         renderContent(item: IHomeTab) {
             this.renderedItems.add(item.id);
-            return item.render();
+            try {
+                const el = item.render();
+                if (!el || (typeof el === "object" && !el.type)) return null;
+                return el;
+            } catch { return null; }
         }
 
         renderContentIfRenderedBefore(item: IHomeTab) {

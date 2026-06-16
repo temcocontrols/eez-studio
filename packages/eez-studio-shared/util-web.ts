@@ -174,7 +174,13 @@ export async function readJsObjectFromFile(
     filePath: string
 ): Promise<any> {
     const text = await getBridgeAPI().readTextFile(filePath);
-    return JSON.parse(text);
+    if (!text || text.trim().length === 0) return {};
+    try {
+        return JSON.parse(text);
+    } catch (err) {
+        console.error("Failed to parse JSON from file:", filePath, err);
+        return {};
+    }
 }
 
 export async function removeFolder(folderPath: string): Promise<void> {

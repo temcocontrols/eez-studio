@@ -70,9 +70,8 @@ class ExamplesCatalog {
     async _loadCatalog() {
         let catalogPath = this.catalogPath;
         if (await fileExists(catalogPath)) {
-            return (await readJsObjectFromFile(
-                catalogPath
-            )) as ExampleProject[];
+            const data = await readJsObjectFromFile(catalogPath);
+            if (Array.isArray(data)) return data as ExampleProject[];
         }
         return [] as ExampleProject[];
     }
