@@ -17,9 +17,10 @@
 
 /// <reference path="./home/globals.d.ts"/>
 
-// EEZ Studio CSS (from the eez-studio fork build directory, aliased in quasar.config.js)
-import "@eez-studio-build/eez-studio-ui/_stylesheets/main.css";
-import "@eez-studio-build/eez-studio-ui/_stylesheets/main-dark.css";
+// EEZ Studio CSS (all styles in one LESS entry — variables shared across components)
+import "/@fs/c:/QN/temcocontrols/eez-studio/packages/eez-studio-ui/_stylesheets/eez-studio.less";
+import "@eez-studio-build/eez-studio-ui/_stylesheets/material-icons.css";
+import "react-toastify/dist/ReactToastify.css";
 
 import React from "react";
 import { createRoot } from "react-dom/client";
