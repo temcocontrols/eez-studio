@@ -138,8 +138,9 @@ export const LOCALES = {
     zu: "Zulu"
 };
 
-export let getLocale: () => string;
-export let setLocale: (value: string) => void;
+export let getLocale: () => string = () =>
+    (typeof navigator !== "undefined" && navigator.language) || "en";
+export let setLocale: (value: string) => void = () => {};
 
 if (isRenderer()) {
     getLocale = function () {
@@ -162,8 +163,8 @@ export const DATE_FORMATS = [
     { format: "ll", description: "Locale default #4" }
 ];
 
-export let getDateFormat: () => string;
-export let setDateFormat: (value: string) => void;
+export let getDateFormat: () => string = () => "YYYY-MM-DD";
+export let setDateFormat: (value: string) => void = () => {};
 
 if (isRenderer()) {
     getDateFormat = function () {
@@ -181,8 +182,8 @@ if (isRenderer()) {
 
 export const TIME_FORMATS = [{ format: "LTS", description: "Locale default" }];
 
-export let getTimeFormat: () => string;
-export let setTimeFormat: (value: string) => void;
+export let getTimeFormat: () => string = () => "HH:mm:ss";
+export let setTimeFormat: (value: string) => void = () => {};
 
 if (isRenderer()) {
     getTimeFormat = function () {
