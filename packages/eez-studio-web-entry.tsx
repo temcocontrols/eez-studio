@@ -18,7 +18,7 @@
 /// <reference path="./home/globals.d.ts"/>
 
 // EEZ Studio CSS (all styles in one LESS entry — variables shared across components)
-import "/@fs/c:/QN/temcocontrols/eez-studio/packages/eez-studio-ui/_stylesheets/eez-studio.less";
+import "./eez-studio.less";
 import "@eez-studio-build/eez-studio-ui/_stylesheets/material-icons.css";
 import "react-toastify/dist/ReactToastify.css";
 
