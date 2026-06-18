@@ -14,11 +14,14 @@ let lz4_module: {
 
 export async function compress(buffer: Buffer, compressionLevel: number) {
     if (!lz4_module) {
-        // load lz4 wasm module
+        // load lz4 wasm module (use dynamic import for browser compatibility)
         lz4_module = await new Promise<any>(resolve => {
-            const lz4_module_constructor = require("project-editor/flow/runtime/wasm/lz4.js");
-            const lz4_module = lz4_module_constructor(() => {
-                resolve(lz4_module);
+            import("project-editor/flow/runtime/wasm/lz4.js").then(mod => {
+                // CJS module: try .default first, fall back to mod itself
+                const lz4_module_constructor = mod.default || mod;
+                const lz4_module = lz4_module_constructor(() => {
+                    resolve(lz4_module);
+                });
             });
         });
     }

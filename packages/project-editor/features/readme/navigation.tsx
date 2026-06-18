@@ -12,7 +12,7 @@ import { observer } from "mobx-react";
 import { ProjectContext } from "project-editor/project/context";
 import { EditorComponent } from "project-editor/project/ui/EditorComponent";
 import { IPanel } from "project-editor/store";
-import { readTextFile } from "eez-studio-shared/util-web";
+import { readTextFile } from "eez-studio-shared/util-electron";
 
 export const ReadmeEditor = observer(
     class ReadmeEditor extends EditorComponent implements IPanel {

@@ -67,48 +67,6 @@ import { IListNode, List, ListContainer, ListItem } from "eez-studio-ui/list";
 import { ColorFormat, ColorFormatType } from "project-editor/features/style/color-format";
 import { lvglProperties, LVGLPropertiesGroup, LVGLPropertyInfo } from "project-editor/lvgl/style-catalog";
 
-// Must be at top of module — var is hoisted as undefined, registerAction lazily
-// initializes it if called during circular import evaluation (before this line runs).
-// actionDefinitions export syncs to this after module init completes.
-var _actionDefs: IActionDefinition[] | undefined;
-var _actionClasses: Map<string, typeof LVGLActionType> | undefined;
-var _actionNameToActionId: Map<string, number> | undefined;
-var _actionIdToActionName: Map<number, string> | undefined;
-
-export function getActionDefinitions(): IActionDefinition[] {
-    if (!_actionDefs) _actionDefs = [];
-    return _actionDefs;
-}
-function getActionClasses() {
-    if (!_actionClasses) _actionClasses = new Map();
-    return _actionClasses;
-}
-function getActionNameToActionId() {
-    if (!_actionNameToActionId) _actionNameToActionId = new Map();
-    return _actionNameToActionId;
-}
-function getActionIdToActionName() {
-    if (!_actionIdToActionName) _actionIdToActionName = new Map();
-    return _actionIdToActionName;
-}
-
-// Placeholder: LVGLActionType not yet declared during circular import evaluation.
-// After the real class is declared, it replaces this placeholder.
-var _LVGLActionBase: any;
-function getLVGLActionBase() {
-    if (!_LVGLActionBase) {
-        if (EezObject && EezObject.classInfo) {
-            _LVGLActionBase = EezObject;
-        } else {
-            // Circular import: EezObject.classInfo not ready; use minimal stub
-            _LVGLActionBase = class { static classInfo: any = { properties: [] } };
-        }
-    }
-    return _LVGLActionBase;
-}
-
-export const actionDefinitions: IActionDefinition[] = getActionDefinitions() as any;
-
 ////////////////////////////////////////////////////////////////////////////////
 
 type LvglActionPropertyType =
@@ -183,6 +141,11 @@ export interface IActionDefinition {
     disabled?: (project: Project) => string | false;
 }
 
+export const actionDefinitions: IActionDefinition[] = [];
+const actionClasses = new Map<string, typeof LVGLActionType>();
+const actionNameToActionId = new Map<string, number>();
+const actionIdToActionName = new Map<number, string>();
+
 function getActionDisplayName(actionDefinition: IActionDefinition) {
     return (actionDefinition.displayName || humanize(actionDefinition.name))
         .split(" ")
@@ -247,17 +210,17 @@ function getStyleProperty(actionType: LVGLActionType) {
 }
 
 export function registerAction(actionDefinition: IActionDefinition) {
-    getActionDefinitions().push(actionDefinition);
+    actionDefinitions.push(actionDefinition);
 
-    if (getActionNameToActionId().has(actionDefinition.name)) {
+    if (actionNameToActionId.has(actionDefinition.name)) {
         throw "duplicate LVGL action name";
     }
-    if (getActionIdToActionName().has(actionDefinition.id)) {
+    if (actionIdToActionName.has(actionDefinition.id)) {
         throw "duplicate LVGL action name";
     }
 
-    getActionNameToActionId().set(actionDefinition.name, actionDefinition.id);
-    getActionIdToActionName().set(actionDefinition.id, actionDefinition.name);
+    actionNameToActionId.set(actionDefinition.name, actionDefinition.id);
+    actionIdToActionName.set(actionDefinition.id, actionDefinition.name);
 
     const properties: PropertyInfo[] = [];
 
@@ -451,8 +414,8 @@ export function registerAction(actionDefinition: IActionDefinition) {
 
     const actionDisplayName = getActionDisplayName(actionDefinition);
 
-    const actionClass = class extends getLVGLActionBase() {
-        static classInfo = makeDerivedClassInfo((getLVGLActionBase() as any).classInfo, {
+    const actionClass = class extends LVGLActionType {
+        static classInfo = makeDerivedClassInfo(LVGLActionType.classInfo, {
             properties,
             label: () => actionDisplayName,
             defaultValue,
@@ -748,7 +711,7 @@ export function registerAction(actionDefinition: IActionDefinition) {
         }
     };
 
-    getActionClasses().set(actionDefinition.name, actionClass);
+    actionClasses.set(actionDefinition.name, actionClass);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -803,7 +766,7 @@ class NewLVGLActionDialogState {
     get groups() {
         const groups: string[] = [];
 
-        for (const actionDefinition of getActionDefinitions()) {
+        for (const actionDefinition of actionDefinitions) {
             if (
                 this.searchFilteredActionDefinitions.indexOf(
                     actionDefinition
@@ -845,7 +808,7 @@ class NewLVGLActionDialogState {
     }
 
     get searchFilteredActionDefinitions() {
-        return getActionDefinitions().filter(actionDefinition => {
+        return actionDefinitions.filter(actionDefinition => {
             if (actionDefinition.disabled) {
                 if (actionDefinition.disabled(this.project) !== false) {
                     return false;
@@ -1038,7 +1001,7 @@ export class LVGLActionType extends EezObject {
         getClass: function (projectStore: ProjectStore, jsObject: any) {
             if (jsObject.action == "ObjectSetX") jsObject.action = "objSetX";
 
-            const actionClass = getActionClasses().get(jsObject.action);
+            const actionClass = actionClasses.get(jsObject.action);
             if (actionClass) {
                 return actionClass;
             }
@@ -1057,7 +1020,7 @@ export class LVGLActionType extends EezObject {
                     return `Action #${actions.indexOf(object) + 1}`;
                 },
                 type: PropertyType.Enum,
-                enumItems: [...getActionClasses().keys()].map(id => ({
+                enumItems: [...actionClasses.keys()].map(id => ({
                     id
                 })),
                 enumDisallowUndefined: true,
@@ -1080,7 +1043,7 @@ export class LVGLActionType extends EezObject {
 
             let actionTypeObject;
 
-            const ActionClass = getActionClasses().get(action)!;
+            const ActionClass = actionClasses.get(action)!;
 
             actionTypeObject = createObject<LVGLActionType>(
                 project._store,
@@ -1242,9 +1205,6 @@ export class LVGLActionType extends EezObject {
             }));
     }
 }
-
-// Sync the placeholder used by registerAction for circular import safety
-_LVGLActionBase = LVGLActionType as any;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -1786,10 +1746,10 @@ export function generateLVGLActionsMarkdown() {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-import "./actions-catalog";
+// Dynamic import avoids circular dependency: actionDefinitions must be initialized first
+import("./actions-catalog");
 
 /*
-
 ////////////////////////////////////////////////////////////////////////////////
 
 const LVGL_ACTIONS = {

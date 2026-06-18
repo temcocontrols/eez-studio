@@ -1,5 +1,5 @@
-import { resolve } from "eez-studio-shared/path-utils";
-import { getBridgeAPI } from "eez-studio-shared/bridge";
+import fs from "fs";
+import { resolve } from "path";
 import {
     NamingConvention,
     getName,
@@ -14,7 +14,7 @@ import { Project } from "project-editor/project/project";
 import { Section, getAncestorOfType } from "project-editor/store";
 import type { LVGLUserWidgetWidget, LVGLWidget } from "./widgets";
 import type { Assets } from "project-editor/build/assets";
-import { isDev } from "eez-studio-shared/util-web";
+import { isDev } from "eez-studio-shared/util-electron";
 import { getColorRGB } from "eez-studio-shared/color";
 import { writeTextFile, writeBinaryData } from "project-editor/build/build";
 import type { LVGLStyle } from "project-editor/lvgl/style";
@@ -3206,27 +3206,27 @@ export async function generateSourceCodeForEezFramework(
     isUsingCrypyoSha256: boolean
 ) {
     try {
-        await getBridgeAPI().deleteFile(destinationFolderPath + "/eez-flow.cpp");
+        await fs.promises.rm(destinationFolderPath + "/eez-flow.cpp");
     } catch (err) {}
 
     try {
-        await getBridgeAPI().deleteFile(destinationFolderPath + "/eez-flow.h");
+        await fs.promises.rm(destinationFolderPath + "/eez-flow.h");
     } catch (err) {}
 
     try {
-        await getBridgeAPI().deleteFile(destinationFolderPath + "/eez-flow-lz4.c");
+        await fs.promises.rm(destinationFolderPath + "/eez-flow-lz4.c");
     } catch (err) {}
 
     try {
-        await getBridgeAPI().deleteFile(destinationFolderPath + "/eez-flow-lz4.h");
+        await fs.promises.rm(destinationFolderPath + "/eez-flow-lz4.h");
     } catch (err) {}
 
     try {
-        await getBridgeAPI().deleteFile(destinationFolderPath + "/eez-flow-sha256.c");
+        await fs.promises.rm(destinationFolderPath + "/eez-flow-sha256.c");
     } catch (err) {}
 
     try {
-        await getBridgeAPI().deleteFile(destinationFolderPath + "/eez-flow-sha256.h");
+        await fs.promises.rm(destinationFolderPath + "/eez-flow-sha256.h");
     } catch (err) {}
 
     if (
@@ -3241,8 +3241,9 @@ export async function generateSourceCodeForEezFramework(
 
     // post fix structs.h
     try {
-        let structs_H = await getBridgeAPI().readTextFile(
-            destinationFolderPath + "/structs.h"
+        let structs_H = await fs.promises.readFile(
+            destinationFolderPath + "/structs.h",
+            "utf-8"
         );
         structs_H = structs_H.replace(`#include <eez/flow/flow.h>\n`, "");
         await writeTextFile(destinationFolderPath + "/structs.h", structs_H);
@@ -3250,8 +3251,9 @@ export async function generateSourceCodeForEezFramework(
 
     // post fix ui.h
     try {
-        let ui_H = await getBridgeAPI().readTextFile(
-            destinationFolderPath + "/ui.h"
+        let ui_H = await fs.promises.readFile(
+            destinationFolderPath + "/ui.h",
+            "utf-8"
         );
         ui_H = ui_H.replace(
             `#if defined(EEZ_FOR_LVGL)\n#include <eez/flow/lvgl_api.h>\n#endif\n`,
@@ -3265,24 +3267,30 @@ export async function generateSourceCodeForEezFramework(
         : process.resourcesPath! + "/eez-framework-amalgamation";
 
     // Copy eez-flow.h (will be modified below)
-    const eezFlowH = await getBridgeAPI().readTextFile(
-        eezframeworkAmalgamationPath + "/eez-flow.h"
+    const eezFlowH = await fs.promises.readFile(
+        eezframeworkAmalgamationPath + "/eez-flow.h",
+        "utf-8"
     );
     await writeTextFile(destinationFolderPath + "/eez-flow.h", eezFlowH);
 
-    let eezH = await getBridgeAPI().readTextFile(
-        destinationFolderPath + "/eez-flow.h"
+    let eezH = await fs.promises.readFile(
+        destinationFolderPath + "/eez-flow.h",
+        "utf-8"
     );
 
     let defines = [];
 
     if (project.settings.build.compressFlowDefinition) {
-        const lz4C = await getBridgeAPI().readTextFile(
-            eezframeworkAmalgamationPath + "/eez-flow-lz4.c");
+        const lz4C = await fs.promises.readFile(
+            eezframeworkAmalgamationPath + "/eez-flow-lz4.c",
+            "utf-8"
+        );
         await writeTextFile(destinationFolderPath + "/eez-flow-lz4.c", lz4C);
 
-        const lz4H = await getBridgeAPI().readTextFile(
-            eezframeworkAmalgamationPath + "/eez-flow-lz4.h");
+        const lz4H = await fs.promises.readFile(
+            eezframeworkAmalgamationPath + "/eez-flow-lz4.h",
+            "utf-8"
+        );
         await writeTextFile(destinationFolderPath + "/eez-flow-lz4.h", lz4H);
     } else {
         eezH = eezH.replace(
@@ -3294,15 +3302,19 @@ export async function generateSourceCodeForEezFramework(
     }
 
     if (isUsingCrypyoSha256) {
-        const sha256C = await getBridgeAPI().readTextFile(
-            eezframeworkAmalgamationPath + "/eez-flow-sha256.c");
+        const sha256C = await fs.promises.readFile(
+            eezframeworkAmalgamationPath + "/eez-flow-sha256.c",
+            "utf-8"
+        );
         await writeTextFile(
             destinationFolderPath + "/eez-flow-sha256.c",
             sha256C
         );
 
-        const sha256H = await getBridgeAPI().readTextFile(
-            eezframeworkAmalgamationPath + "/eez-flow-sha256.h");
+        const sha256H = await fs.promises.readFile(
+            eezframeworkAmalgamationPath + "/eez-flow-sha256.h",
+            "utf-8"
+        );
         await writeTextFile(
             destinationFolderPath + "/eez-flow-sha256.h",
             sha256H
@@ -3355,8 +3367,10 @@ export async function generateSourceCodeForEezFramework(
     await writeTextFile(destinationFolderPath + "/eez-flow.h", eezH);
 
     // Copy eez-flow.cpp
-    let eezFlowCpp = await getBridgeAPI().readTextFile(
-        eezframeworkAmalgamationPath + "/eez-flow.cpp");
+    let eezFlowCpp = await fs.promises.readFile(
+        eezframeworkAmalgamationPath + "/eez-flow.cpp",
+        "utf-8"
+    );
 
     if (defines.length > 0) {
         eezFlowCpp = cleanupSourceFile(eezFlowCpp, defines);

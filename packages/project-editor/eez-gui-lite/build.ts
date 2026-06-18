@@ -1,7 +1,7 @@
-import * as path from "eez-studio-shared/path-utils";
-import { getBridgeAPI } from "eez-studio-shared/bridge";
+import fs from "fs";
+import { resolve } from "path";
 
-import { isDev, writeTextFile } from "eez-studio-shared/util-web";
+import { isDev, writeTextFile } from "eez-studio-shared/util-electron";
 import { getColorRGB } from "eez-studio-shared/color";
 
 import { Assets } from "project-editor/build/assets";
@@ -1365,23 +1365,27 @@ export class BuildEezGuiLite {
 
 export async function generateSourceCodeForEezGuiLite(project: Project, destinationFolderPath: string) {
     try {
-        await getBridgeAPI().deleteFile(destinationFolderPath + "/eez-gui-lite.c");
+        await fs.promises.rm(destinationFolderPath + "/eez-gui-lite.c");
     } catch (err) {}
 
     try {
-        await getBridgeAPI().deleteFile(destinationFolderPath + "/eez-gui-lite.h");
+        await fs.promises.rm(destinationFolderPath + "/eez-gui-lite.h");
     } catch (err) {}
 
 
     const eezGuiLitePath = isDev
-        ? path.resolve(`${sourceRootDir()}/../resources/eez-gui-lite`)
+        ? resolve(`${sourceRootDir()}/../resources/eez-gui-lite`)
         : process.resourcesPath! + "/eez-gui-lite";
 
-    const eezGuiLiteC = await getBridgeAPI().readTextFile(
-        eezGuiLitePath + "/eez-gui-lite.c");
+    const eezGuiLiteC = await fs.promises.readFile(
+        eezGuiLitePath + "/eez-gui-lite.c",
+        "utf-8"
+    );
     await writeTextFile(destinationFolderPath + "/eez-gui-lite.c", eezGuiLiteC);
 
-    const eezGuiLiteH = await getBridgeAPI().readTextFile(
-        eezGuiLitePath + "/eez-gui-lite.h");
+    const eezGuiLiteH = await fs.promises.readFile(
+        eezGuiLitePath + "/eez-gui-lite.h",
+        "utf-8"
+    );
     await writeTextFile(destinationFolderPath + "/eez-gui-lite.h", eezGuiLiteH);
 }

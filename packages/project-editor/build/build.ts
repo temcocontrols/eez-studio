@@ -1,12 +1,12 @@
-import * as path from "eez-studio-shared/path-utils";
-import { getBridgeAPI } from "eez-studio-shared/bridge";
+import path from "path";
+import fs from "fs";
 import { createTransformer } from "mobx-utils";
 
 import {
     writeTextFile as originalWriteTextFile,
     writeBinaryData as originalWriteBinaryData,
     makeFolder
-} from "eez-studio-shared/util-web";
+} from "eez-studio-shared/util-electron";
 
 import type { BuildResult } from "project-editor/store/features";
 import {
@@ -133,7 +133,7 @@ async function loadPreviousManifest(
     const manifestPath = path.join(destinationFolderPath, ".eez-project-build");
 
     try {
-        const content = await getBridgeAPI().readTextFile(manifestPath);
+        const content = await fs.promises.readFile(manifestPath, "utf-8");
         return JSON.parse(content) as BuildManifest;
     } catch (err) {
         return null;
@@ -150,9 +150,10 @@ async function saveManifest(
         files: files.sort() // Sort for consistency
     };
 
-    await getBridgeAPI().writeTextFile(
+    await fs.promises.writeFile(
         manifestPath,
-        JSON.stringify(manifest, null, 2)
+        JSON.stringify(manifest, null, 2),
+        "utf-8"
     );
 }
 
@@ -168,7 +169,7 @@ async function deleteOrphanedFiles(
     for (const relativePath of orphanedFiles) {
         const absolutePath = path.join(destinationFolderPath, relativePath);
         try {
-            await getBridgeAPI().deleteFile(absolutePath);
+            await fs.promises.unlink(absolutePath);
             outputSectionsStore.write(
                 Section.OUTPUT,
                 MessageType.INFO,
@@ -473,8 +474,7 @@ export async function build(
                 project.settings.build.destinationFolder || "."
             );
 
-            const destExists = await getBridgeAPI().fileExists(destinationFolderPath);
-            if (!destExists) {
+            if (!fs.existsSync(destinationFolderPath)) {
                 await makeFolder(destinationFolderPath);
             }
 
@@ -634,22 +634,10 @@ export async function build(
                     }
                 });
 
-                const chunks: Buffer[] = [];
-                archive.on("data", (chunk: Buffer) => {
-                    chunks.push(chunk);
-                });
+                var output = fs.createWriteStream(destinationFilePath);
 
-                archive.on("end", async () => {
-                    try {
-                        const buffer = Buffer.concat(chunks);
-                        await getBridgeAPI().writeFile(
-                            destinationFilePath,
-                            buffer.buffer
-                        );
-                        resolve();
-                    } catch (err) {
-                        reject(err);
-                    }
+                output.on("close", function () {
+                    resolve();
                 });
 
                 archive.on("warning", function (err: any) {
@@ -659,6 +647,8 @@ export async function build(
                 archive.on("error", function (err: any) {
                     reject(err);
                 });
+
+                archive.pipe(output);
 
                 const json = getJSON(projectStore, 0);
                 archive.append(json, { name: baseName + ".eez-project" });
@@ -683,13 +673,14 @@ export async function build(
                     parts = Object.assign(parts, buildResult);
                 }
 
-                await getBridgeAPI().writeTextFile(
+                fs.writeFileSync(
                     destinationFilePath,
                     JSON.stringify({
                         GUI_ASSETS_DATA_MAP_JS: parts.GUI_ASSETS_DATA_MAP_JS,
                         GUI_ASSETS_DATA:
                             parts.GUI_ASSETS_DATA.toString("base64")
-                    })
+                    }),
+                    "utf8"
                 );
             }
         }
@@ -781,8 +772,7 @@ export async function buildExtensions(projectStore: ProjectStore) {
         let destinationFolderPath = projectStore.getAbsoluteFilePath(
             project.settings.build.destinationFolder || "."
         );
-        const destExists2 = await getBridgeAPI().fileExists(destinationFolderPath);
-        if (!destExists2) {
+        if (!fs.existsSync(destinationFolderPath)) {
             throw new BuildException("Cannot find destination folder.");
         }
 

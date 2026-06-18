@@ -395,6 +395,11 @@ const Content = observer(
                         {node.getName()}
                     </div>
                 );
+            } else {
+                const iconStr = node.getIcon();
+                if (typeof iconStr === "string") {
+                    renderValues.leading = <Icon icon={iconStr} size={20} />;
+                }
             }
         };
 

@@ -2,7 +2,7 @@ import React from "react";
 import * as FlexLayout from "flexlayout-react";
 import { observer } from "mobx-react";
 
-import { readTextFile, writeTextFile } from "eez-studio-shared/util-web";
+import { readTextFile, writeTextFile } from "eez-studio-shared/util-electron";
 import { validators } from "eez-studio-shared/validation";
 
 import * as notification from "eez-studio-ui/notification";

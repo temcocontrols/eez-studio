@@ -44,10 +44,10 @@ export function evalConstantExpression(project: Project, expression: string) {
     return { value, valueType };
 }
 
-export class IExpressionContext {
-    dataContext!: IDataContext;
+export interface IExpressionContext {
+    dataContext: IDataContext;
     flowState?: IFlowState;
-    projectStore!: ProjectStore;
+    projectStore: ProjectStore;
 }
 
 export function evalExpression(

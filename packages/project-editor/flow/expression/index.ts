@@ -12,7 +12,6 @@ export {
 } from "project-editor/flow/expression/build";
 
 export {
-    IExpressionContext,
     evalConstantExpression,
     evalExpression,
     evalExpressionGetValueType,

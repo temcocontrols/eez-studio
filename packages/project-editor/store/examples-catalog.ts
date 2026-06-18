@@ -5,7 +5,7 @@ import {
     fileExists,
     readJsObjectFromFile,
     writeJsObjectToFile
-} from "eez-studio-shared/util-web";
+} from "eez-studio-shared/util-electron";
 
 import * as notification from "eez-studio-ui/notification";
 
@@ -70,8 +70,9 @@ class ExamplesCatalog {
     async _loadCatalog() {
         let catalogPath = this.catalogPath;
         if (await fileExists(catalogPath)) {
-            const data = await readJsObjectFromFile(catalogPath);
-            if (Array.isArray(data)) return data as ExampleProject[];
+            return (await readJsObjectFromFile(
+                catalogPath
+            )) as ExampleProject[];
         }
         return [] as ExampleProject[];
     }

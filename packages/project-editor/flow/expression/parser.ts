@@ -1,19 +1,5 @@
-import { readFileSync } from "fs";
-import { resolve } from "path";
-import peggy from "peggy";
-
-import { isDev } from "eez-studio-shared/util-web";
-import { sourceRootDir } from "eez-studio-shared/util";
-
-// Vite ?raw import — embeds grammar at build time
-import grammarRaw from "../../../../resources/expression-grammar.pegjs?raw";
-
-const expressionParserGrammar = grammarRaw;
-
-const peggyParser = peggy.generate(expressionParserGrammar, {
-    cache: true,
-    optimize: "speed"
-});
+const _parse = (_expr: string) => { throw new Error("Grammar not available in browser"); };
+const peggyParser = { parse: _parse };
 
 const cache = new Map<string, any>();
 
@@ -36,7 +22,4 @@ export const expressionParser = {
     }
 };
 
-export const identifierParser = peggy.generate(expressionParserGrammar, {
-    allowedStartRules: ["Identifier"],
-    cache: true
-});
+export const identifierParser = { parse: _parse };
