@@ -2,7 +2,7 @@ import type * as ElectronModule from "electron";
 import type * as ElectronRemoteModule from "@electron/remote";
 import { toJS } from "mobx";
 
-import { isRenderer } from "eez-studio-shared/util-web";
+import { isRenderer } from "eez-studio-shared/util-electron";
 import { guid } from "eez-studio-shared/guid";
 import { sourceRootDir } from "eez-studio-shared/util";
 

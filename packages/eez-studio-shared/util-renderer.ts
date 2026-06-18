@@ -1,4 +1,15 @@
-import { ipcRenderer } from "eez-studio-shared/ipc";
+import { dialog, BrowserWindow, getCurrentWindow } from "@electron/remote";
+import { ipcRenderer } from "electron";
+
+function mnemonicLabel(label: string): string {
+    const os = require("os");
+
+    if (os.platform() != "win32") {
+        return label.replace(/\(&&\w\)|&&/g, ""); // no mnemonic support on mac/linux
+    }
+
+    return label.replace(/&&/g, "&");
+}
 
 export async function confirmSave({
     description,
@@ -11,23 +22,66 @@ export async function confirmSave({
     dontSaveCallback: () => void;
     cancelCallback: () => void;
 }) {
-    // Browser-compatible: use native confirm dialog
-    const result = confirm(
-        "Do you want to save changes?\n\n" +
-            description +
-            "Your changes will be lost if you don't save them."
-    );
-    if (result) {
-        saveCallback();
+    enum ConfirmResult {
+        SAVE,
+        DONT_SAVE,
+        CANCEL
+    }
+
+    const saveButton = {
+        label: mnemonicLabel("&&Save"),
+        result: ConfirmResult.SAVE
+    };
+    const dontSaveButton = {
+        label: mnemonicLabel("Do&&n't Save"),
+        result: ConfirmResult.DONT_SAVE
+    };
+    const cancelButton = { label: "Cancel", result: ConfirmResult.CANCEL };
+
+    const os = require("os");
+
+    const buttons: any[] = [];
+    if (os.platform() == "win32") {
+        buttons.push(saveButton, dontSaveButton, cancelButton);
+    } else if (os.platform() == "linux") {
+        buttons.push(dontSaveButton, cancelButton, saveButton);
     } else {
+        buttons.push(saveButton, cancelButton, dontSaveButton);
+    }
+
+    let opts: Electron.MessageBoxOptions = {
+        type: "warning",
+        title: "EEZ Studio",
+        message: "Do you want to save changes?",
+        detail:
+            description + "Your changes will be lost if you don't save them.",
+        noLink: true,
+        buttons: buttons.map(b => b.label),
+        cancelId: buttons.indexOf(cancelButton)
+    };
+
+    if (os.platform() == "linux") {
+        opts.defaultId = 2;
+    }
+
+    const result = await dialog.showMessageBox(getCurrentWindow(), opts);
+    const buttonIndex = result.response;
+    let choice = buttons[buttonIndex].result;
+    if (choice == ConfirmResult.SAVE) {
+        saveCallback();
+    } else if (choice == ConfirmResult.DONT_SAVE) {
         dontSaveCallback();
+    } else {
+        cancelCallback();
     }
 }
 
 export function sendSimpleMessage(message: string, args: any) {
-    ipcRenderer.send("shared/simple-message", {
-        message,
-        args
+    BrowserWindow.getAllWindows().forEach(window => {
+        window.webContents.send("shared/simple-message", {
+            message,
+            args
+        });
     });
 }
 

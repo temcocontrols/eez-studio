@@ -1,5 +1,4 @@
 import { toJS, isObservableArray } from "mobx";
-import momentLib from "moment";
 import type MomentModule from "moment";
 import stringify from "json-stable-stringify";
 
@@ -107,42 +106,17 @@ var defaultDateTimeFormat: string;
 
 export function getMoment() {
     if (!moment) {
-        try {
-            moment = (momentLib as any).default || momentLib;
-            if (moment) {
-                try {
-                    const mdf = require("moment-duration-format");
-                    (mdf.default || mdf)(moment);
-                } catch (_) { /* moment-duration-format optional */ }
-                const { getLocale, getDateFormat, getTimeFormat } =
-                    require("eez-studio-shared/i10n") as typeof I10nModule;
-                // Defensive: in the browser, Vite's CJS interop may
-                // leave export-let bindings undefined on first require.
-                const loc = typeof getLocale === "function" ? getLocale : () =>
-                    (typeof navigator !== "undefined" && navigator.language) || "en";
-                const df = typeof getDateFormat === "function" ? getDateFormat : () => "YYYY-MM-DD";
-                const tf = typeof getTimeFormat === "function" ? getTimeFormat : () => "HH:mm:ss";
-                userLocale = loc();
-                defaultDateFormat = df();
-                defaultTimeFormat = tf();
-                defaultDateTimeFormat = defaultDateFormat + " " + defaultTimeFormat;
-                try {
-                    if (typeof moment.localeData === "function") {
-                        localeData = moment.localeData(userLocale);
-                        localeWeekdays = localeData.weekdays();
-                    } else {
-                        localeData = { firstDayOfWeek: () => 0, weekdays: () => ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"] } as any;
-                        localeWeekdays = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
-                    }
-                    if (typeof moment.locale === "function") {
-                        moment.locale(userLocale);
-                    }
-                } catch (_) { /* locale setup failed — use defaults */ }
-            }
-        } catch (e) {
-            console.error("Failed to load moment.js:", e);
-            moment = null as any;
-        }
+        moment = require("moment") as typeof MomentModule;
+        require("moment-duration-format")(moment);
+        const { getLocale, getDateFormat, getTimeFormat } =
+            require("eez-studio-shared/i10n") as typeof I10nModule;
+        userLocale = getLocale();
+        localeData = getMoment().localeData(userLocale);
+        localeWeekdays = localeData.weekdays();
+        moment.locale(userLocale);
+        defaultDateFormat = getDateFormat();
+        defaultTimeFormat = getTimeFormat();
+        defaultDateTimeFormat = defaultDateFormat + " " + defaultTimeFormat;
     }
     return moment;
 }
@@ -192,9 +166,7 @@ export async function delay(time: number) {
     return new Promise(resolve => setTimeout(resolve, time));
 }
 
-// Vite replaces JSON imports at build time
-import pkg from "../../package.json";
-export const studioVersion: string = (pkg as any).version || "0.0.0";
+export const studioVersion = require("../../package.json").version;
 
 export function compareVersions(v1: string, v2: string) {
     const v1Parts = v1.toString().split(".");
@@ -244,12 +216,13 @@ export function remap(
 }
 
 export function sourceRootDir() {
-    // In browser mode, the source root is the virtual project root.
-    // Node.js __dirname is not available in browser — return a virtual path.
-    if (typeof __dirname !== "undefined") {
-        return __dirname + "/..";
+    // Browser: __dirname is "/" so "/.." would resolve to filesystem root,
+    // causing readFolder to list the Rust project directory (hundreds of entries).
+    // Return a safe empty path inside the bridge data space instead.
+    if (typeof process === "undefined" || !!(process as any).type) {
+        return "/eez-user-data/_preinstalled";
     }
-    return "/eez-studio";
+    return __dirname + "/..";
 }
 
 ////////////////////////////////////////////////////////////////////////////////

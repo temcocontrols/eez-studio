@@ -3,7 +3,7 @@ import type * as ElectronModule from "electron";
 import type * as ElectronRemoteModule from "@electron/remote";
 import { ipcMain, ipcRenderer } from "electron";
 
-import { isRenderer } from "eez-studio-shared/util-web";
+import { isRenderer } from "eez-studio-shared/util-electron";
 import { guid } from "eez-studio-shared/guid";
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -236,7 +236,7 @@ ipc.on("notify/get-targets", function (event: any, windowId: number) {
 
 if (isRenderer()) {
     const { getCurrentWindow } =
-        await import("@electron/remote");
+        require("@electron/remote") as typeof ElectronRemoteModule;
 
     let currentWindowId = getCurrentWindow().id;
 

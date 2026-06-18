@@ -1,128 +1,70 @@
-/* eslint-disable */
 /**
- * Central API Bridge — replaces ALL Electron, Node.js, and IPC dependencies.
+ * Bridge API — decouples EEZ Studio from the platform-specific backend.
  *
- * In Electron mode, these functions talk to ipcRenderer / @electron/remote / fs.
- * In web (browser) mode, these functions talk to the Rust backend via fetch().
+ * In Electron, the bridge is implemented via IPC. In the browser (T3000Webview),
+ * the bridge is implemented via REST calls to a Rust backend (or mock fallback).
  *
- * The hosting application (T3000Webview) calls setBridgeAPI() with its own
- * implementation before mounting any EEZ Studio component.
+ * This module defines the interface and provides getter/setter so the host app
+ * can inject its implementation before EEZ Studio boots.
  */
-
-////////////////////////////////////////////////////////////////////////////////
-// Types
-////////////////////////////////////////////////////////////////////////////////
-
-export interface OpenDialogOptions {
-    title?: string;
-    filters?: { name: string; extensions: string[] }[];
-    properties?: ("openFile" | "openDirectory" | "multiSelections")[];
-    defaultPath?: string;
-}
-
-export interface SaveDialogOptions {
-    title?: string;
-    filters?: { name: string; extensions: string[] }[];
-    defaultPath?: string;
-}
-
-export interface MessageBoxOptions {
-    type: "info" | "error" | "question" | "warning";
-    title: string;
-    message: string;
-    detail?: string;
-    buttons: string[];
-    cancelId?: number;
-    noLink?: boolean;
-}
-
-export interface MessageBoxResult {
-    response: number;
-}
 
 export interface BridgeAPI {
-    // ── File System ────────────────────────────────────────────
-    /** Read a file and return its content as an ArrayBuffer. */
-    readFile(filePath: string): Promise<ArrayBuffer>;
-    /** Write binary data to a file. */
-    writeFile(filePath: string, data: ArrayBuffer): Promise<void>;
-    /** Read a text file. */
-    readTextFile(filePath: string): Promise<string>;
-    /** Write a text file. */
-    writeTextFile(filePath: string, data: string): Promise<void>;
-    /** Recursively create a directory. */
-    makeFolder(folderPath: string): Promise<void>;
-    /** Check if a file or directory exists. */
-    fileExists(filePath: string): Promise<boolean>;
-    /** Delete a file. */
-    deleteFile(filePath: string): Promise<void>;
-    /** List files in a directory (non-recursive). */
-    listFiles(dirPath: string): Promise<string[]>;
-    /** Get the size of a file in bytes. */
-    getFileSize(filePath: string): Promise<number>;
-    /** Check if a path is a directory. */
-    isDirectory(dirPath: string): Promise<boolean>;
+    // File system
+    readFile(path: string): Promise<ArrayBuffer>;
+    writeFile(path: string, data: Uint8Array): Promise<void>;
+    readTextFile(path: string): Promise<string>;
+    writeTextFile(path: string, data: string): Promise<void>;
+    makeFolder(path: string): Promise<void>;
+    fileExists(path: string): Promise<boolean>;
+    deleteFile(path: string): Promise<void>;
+    listFiles(path: string): Promise<string[]>;
+    getFileSize(path: string): Promise<number>;
+    isDirectory(path: string): Promise<boolean>;
 
-    // ── Dialogs ─────────────────────────────────────────────────
-    /** Show an open file dialog. Returns selected file paths. */
-    showOpenDialog(options: OpenDialogOptions): Promise<string[]>;
-    /** Show a save file dialog. Returns the chosen path or undefined. */
-    showSaveDialog(options: SaveDialogOptions): Promise<string | undefined>;
-    /** Show a message box and return the button index. */
-    showMessageBox(options: MessageBoxOptions): Promise<MessageBoxResult>;
+    // Dialogs
+    showOpenDialog(options?: {
+        title?: string;
+        defaultPath?: string;
+        filters?: { name: string; extensions: string[] }[];
+        properties?: Array<"openFile" | "openDirectory" | "multiSelections">;
+    }): Promise<{ filePaths: string[]; canceled: boolean } | string[]>;
 
-    // ── App Info ────────────────────────────────────────────────
-    /** Get the data path for user data (settings, extensions, etc.). */
+    showSaveDialog(options?: {
+        title?: string;
+        defaultPath?: string;
+        filters?: { name: string; extensions: string[] }[];
+    }): Promise<{ filePath?: string; canceled: boolean } | string | undefined>;
+
+    showMessageBox(options?: {
+        type?: "none" | "info" | "error" | "question" | "warning";
+        title?: string;
+        message: string;
+        detail?: string;
+        buttons?: string[];
+        defaultId?: number;
+        cancelId?: number;
+    }): Promise<{ response: number }>;
+
+    // App info
     getUserDataPath(subPath: string): string;
-    /** Get the application version string. */
     getAppVersion(): string;
-    /** Is this running in development mode? */
     isDev(): boolean;
 
-    // ── Project Operations ──────────────────────────────────────
-    /** Open a .eez-project file by path. Returns parsed project JSON. */
+    // Project
     openProject(filePath: string): Promise<any>;
-    /** Save a project to disk. */
     saveProject(filePath: string, data: any): Promise<void>;
+    buildProject(filePath: string, callback?: (progress: any) => void): Promise<void>;
 
-    // ── Build ───────────────────────────────────────────────────
-    /** Trigger a project build. onMessage receives build progress lines. */
-    buildProject(
-        filePath: string,
-        onMessage: (message: string) => void
-    ): Promise<void>;
+    // Network
+    proxyFetch(url: string): Promise<string>;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-// Singleton
-////////////////////////////////////////////////////////////////////////////////
+let _bridgeAPI: BridgeAPI | null = null;
 
-let _api: BridgeAPI | null = null;
-
-/**
- * Set the bridge API implementation.
- * Must be called BEFORE any EEZ Studio component mounts.
- */
-export function setBridgeAPI(api: BridgeAPI): void {
-    _api = api;
+export function setBridgeAPI(bridge: BridgeAPI): void {
+    _bridgeAPI = bridge;
 }
 
-/**
- * Get the current bridge API.
- * Throws if not yet initialized.
- */
-export function getBridgeAPI(): BridgeAPI {
-    if (!_api) {
-        throw new Error(
-            "Bridge API not initialized. Call setBridgeAPI() before using EEZ Studio."
-        );
-    }
-    return _api;
-}
-
-/**
- * Returns true if the bridge API has been initialized.
- */
-export function isBridgeInitialized(): boolean {
-    return _api !== null;
+export function getBridgeAPI(): BridgeAPI | null {
+    return _bridgeAPI;
 }

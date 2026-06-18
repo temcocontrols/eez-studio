@@ -64,9 +64,24 @@ export async function zipExtract(zipFilePath: string, destFolderPath: string) {
 }
 
 export async function makeFolder(folderPath: string) {
+    // Guard against infinite recursion when path.dirname of root returns root
+    const parentPath = path.dirname(folderPath);
+    if (parentPath === folderPath) {
+        // Reached filesystem root — can't create parent, just try creating this folder
+        await new Promise<void>(async (resolve, reject) => {
+            fs.mkdir(folderPath, err => {
+                if (err && err.code != "EEXIST") {
+                    reject(err);
+                } else {
+                    resolve();
+                }
+            });
+        });
+        return;
+    }
     let exists = await fileExists(folderPath);
     if (!exists) {
-        await makeFolder(path.dirname(folderPath));
+        await makeFolder(parentPath);
         await new Promise<void>(async (resolve, reject) => {
             fs.mkdir(folderPath, err => {
                 if (err && err.code != "EEXIST") {
