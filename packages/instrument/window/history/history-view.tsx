@@ -6,7 +6,7 @@ import { observable, action, keys, makeObservable } from "mobx";
 import { observer } from "mobx-react";
 import * as FlexLayout from "flexlayout-react";
 
-import { readBinaryFile } from "eez-studio-shared/util-web";
+import { readBinaryFile } from "eez-studio-shared/util-electron";
 
 import { IconAction, ButtonAction } from "eez-studio-ui/action";
 import { Toolbar } from "eez-studio-ui/toolbar";
@@ -141,7 +141,7 @@ export const HistoryTools = observer(
 
                     await new Promise(resolve => setTimeout(resolve, 600));
 
-                    let data: string | Buffer = await readBinaryFile(filePath) as any;
+                    let data = await readBinaryFile(filePath);
 
                     let message;
 

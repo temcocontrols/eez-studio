@@ -11,11 +11,11 @@ import { validators } from "eez-studio-shared/validation";
 import type { IShortcut } from "shortcuts/interfaces";
 
 import {
-    IActivityLogEntry,
     activityLogStore,
     log,
     logUpdate,
-    logDelete
+    logDelete,
+    type IActivityLogEntry
 } from "instrument/window/history/activity-log";
 
 import type { InstrumentObject } from "instrument/instrument-object";

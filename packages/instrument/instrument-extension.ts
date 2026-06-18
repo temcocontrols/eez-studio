@@ -6,7 +6,7 @@ import type {
     IExtensionHost
 } from "eez-studio-shared/extensions/extension";
 import { extensions } from "eez-studio-shared/extensions/extensions";
-import { isRenderer } from "eez-studio-shared/util-web";
+import { isRenderer } from "eez-studio-shared/util-electron";
 import { stringCompare } from "eez-studio-shared/string";
 
 import { loadInstrumentExtension } from "instrument/import";

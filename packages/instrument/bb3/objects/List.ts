@@ -11,7 +11,7 @@ import { objectClone } from "eez-studio-shared/util";
 import {
     makeCsvData,
     getValidFileNameFromFileName
-} from "eez-studio-shared/util-web";
+} from "eez-studio-shared/util-electron";
 
 import { BaseList } from "instrument/window/lists/store-renderer";
 import { ListHistoryItem } from "instrument/window/history/items/list";

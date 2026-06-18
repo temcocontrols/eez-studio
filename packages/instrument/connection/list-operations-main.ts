@@ -4,7 +4,7 @@ import { autorun } from "mobx";
 import { roundNumber } from "eez-studio-shared/roundNumber";
 import {
     activityLogStore,
-    IActivityLogEntry,
+    type IActivityLogEntry,
     log
 } from "instrument/window/history/activity-log";
 

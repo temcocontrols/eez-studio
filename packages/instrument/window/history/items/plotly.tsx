@@ -20,7 +20,7 @@ import { PLOTTER_ICON } from "project-editor/ui-components/icons";
 
 import { HistoryItemPreview } from "instrument/window/history/item-preview";
 import { getScrapbookStore } from "../scrapbook";
-import { readTextFile, writeTextFile } from "eez-studio-shared/util-web";
+import { readTextFile, writeTextFile } from "eez-studio-shared/util-electron";
 
 ////////////////////////////////////////////////////////////////////////////////
 

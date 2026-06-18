@@ -20,7 +20,7 @@ import {
     getFileNameWithoutExtension,
     getTempDirPath,
     fileExists
-} from "eez-studio-shared/util-web";
+} from "eez-studio-shared/util-electron";
 import { formatBytes } from "eez-studio-shared/formatBytes";
 
 import * as notification from "eez-studio-ui/notification";

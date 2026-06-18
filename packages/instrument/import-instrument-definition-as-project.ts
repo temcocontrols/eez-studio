@@ -3,7 +3,7 @@ import {
     getFileNameWithoutExtension,
     getFolderName,
     localPathToFileUrl
-} from "eez-studio-shared/util-web";
+} from "eez-studio-shared/util-electron";
 import { objectToJS } from "project-editor/store";
 import { importExtensionToFolder } from "eez-studio-shared/extensions/extensions";
 import { IExtension } from "eez-studio-shared/extensions/extension";
