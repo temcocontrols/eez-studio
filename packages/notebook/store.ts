@@ -1,4 +1,4 @@
-import { isRenderer } from "eez-studio-shared/util-web";
+import { isRenderer } from "eez-studio-shared/util-electron";
 import { db } from "eez-studio-shared/db";
 import {
     createStore,
