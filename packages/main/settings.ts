@@ -11,7 +11,7 @@ import {
 } from "mobx";
 import DatabaseConstructor from "better-sqlite3";
 
-import { getUserDataPath } from "eez-studio-shared/util-web";
+import { getUserDataPath } from "eez-studio-shared/util-electron";
 import { SETTINGS_FILE_NAME, DEFAULT_DB_NAME } from "eez-studio-shared/conf";
 import { DATE_FORMATS, TIME_FORMATS } from "eez-studio-shared/i10n";
 

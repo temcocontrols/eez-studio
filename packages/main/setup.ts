@@ -1,4 +1,4 @@
-import { getUserDataPath, makeFolder } from "eez-studio-shared/util-web";
+import { getUserDataPath, makeFolder } from "eez-studio-shared/util-electron";
 import { EXTENSIONS_FOLDER_NAME } from "eez-studio-shared/conf";
 import { loadExtensions } from "eez-studio-shared/extensions/extensions";
 

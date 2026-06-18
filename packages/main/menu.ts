@@ -24,7 +24,7 @@ import {
 import { settings } from "main/settings";
 import { APP_NAME } from "main/util";
 import { undoManager } from "eez-studio-shared/store";
-import { isDev } from "eez-studio-shared/util-web";
+import { isDev } from "eez-studio-shared/util-electron";
 
 ////////////////////////////////////////////////////////////////////////////////
 
