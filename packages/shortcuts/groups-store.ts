@@ -1,6 +1,6 @@
 import { values } from "mobx";
 
-import { isRenderer } from "eez-studio-shared/util-web";
+import { isRenderer } from "eez-studio-shared/util-electron";
 
 import {
     createStore,
