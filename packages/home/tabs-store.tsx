@@ -1,3 +1,6 @@
+import fs from "fs";
+import { clipboard, ipcRenderer } from "electron";
+import { getCurrentWindow } from "@electron/remote";
 import React from "react";
 import {
     observable,
@@ -9,10 +12,7 @@ import {
     makeObservable,
     IReactionDisposer
 } from "mobx";
-
-import { ipcRenderer } from "eez-studio-shared/ipc";
-import { clipboard, getCurrentWindow } from "eez-studio-shared/platform";
-import { getBridgeAPI } from "eez-studio-shared/bridge";
+import * as path from "path";
 
 import { dockerBuildState } from "project-editor/lvgl/docker-build/docker-build-state";
 
@@ -34,11 +34,8 @@ import type { HistoryViewComponent } from "instrument/window/history/history-vie
 import type * as HistoryViewModule from "instrument/window/history/history-view";
 
 import type * as HomeTabModule from "home/home-tab";
-// Real import needed for Vite ESM — Home and Shortcuts have no circular dep on tabs-store
-import { Home } from "home/home-tab";
 import type * as HistoryModule from "home/history";
 import type * as ShortcutsModule from "home/shortcuts";
-import { ShortcutsAndGroups } from "home/shortcuts";
 
 import { Loader } from "eez-studio-ui/loader";
 
@@ -102,6 +99,7 @@ export class HomeTab implements IHomeTab {
     }
 
     render() {
+        const { Home } = require("home/home-tab") as typeof HomeTabModule;
         return <Home />;
     }
 
@@ -235,6 +233,8 @@ class ShortcutsAndGroupsTab implements IHomeTab {
     }
 
     render() {
+        const { ShortcutsAndGroups } =
+            require("home/shortcuts") as typeof ShortcutsModule;
         return <ShortcutsAndGroups />;
     }
 
@@ -796,10 +796,10 @@ export class ProjectEditorTab implements IHomeTab {
 
         if (this.filePath) {
             if (this.filePath.endsWith(".eez-project")) {
-                return this.filePath.replace(/^.*[\\/]/, "").replace(/\.eez-project$/, "");
+                return path.basename(this.filePath, ".eez-project");
             }
             return (
-                this.filePath.replace(/^.*[\\/]/, "").replace(/\.eez-dashboard$/, "") + " dashboard"
+                path.basename(this.filePath, ".eez-dashboard") + " dashboard"
             );
         }
 
@@ -845,13 +845,14 @@ export class ProjectEditorTab implements IHomeTab {
                         return;
                     }
                 } else {
-                    jsonStr = await getBridgeAPI().readTextFile(
-                        this.filePath
+                    jsonStr = await fs.promises.readFile(
+                        this.filePath,
+                        "utf-8"
                     );
                 }
 
                 const json = JSON.parse(jsonStr);
-                const projectType = json?.settings?.general?.projectType;
+                const projectType = json.settings.general.projectType;
                 const icon = getProjectIcon(
                     this.filePath,
                     projectType,

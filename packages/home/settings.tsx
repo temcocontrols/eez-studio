@@ -1,3 +1,8 @@
+import fs from "fs";
+import { ipcRenderer, shell, clipboard } from "electron";
+import { dialog, getCurrentWindow } from "@electron/remote";
+import { confirm } from "eez-studio-ui/dialog-electron";
+import path from "path";
 import React from "react";
 import {
     observable,
@@ -12,12 +17,7 @@ import { observer } from "mobx-react";
 import classNames from "classnames";
 import * as FlexLayout from "flexlayout-react";
 
-import { ipcRenderer } from "eez-studio-shared/ipc";
-import { clipboard, shell } from "eez-studio-shared/platform";
-import { getBridgeAPI } from "eez-studio-shared/bridge";
-import { createEmptyFile } from "eez-studio-shared/util-web";
-import { dirname, basename } from "eez-studio-shared/path-utils";
-import { confirm } from "eez-studio-ui/dialog-web";
+import { app, createEmptyFile } from "eez-studio-shared/util-electron";
 import { stringCompare } from "eez-studio-shared/string";
 import {
     initInstrumentDatabase,
@@ -261,9 +261,9 @@ class SettingsController {
         const content = document.getElementById(
             "EezStudio_Content"
         ) as HTMLDivElement;
-        if (!content) return;
-
-        content.style.opacity = "0";
+        if (content) {
+            content.style.opacity = "0";
+        }
 
         const body = document.querySelector("#EezStudio_Content>.EezStudio_HeaderWithBody>.EezStudio_Body");
         if (body && body instanceof HTMLDivElement && body.style) {
@@ -280,19 +280,12 @@ class SettingsController {
 
         if (this.isDarkTheme) {
             document.body.parentElement?.setAttribute("data-bs-theme", "dark");
-
-            mainLinkElement.href =
-                "../eez-studio-ui/_stylesheets/main-dark.css";
-
-            flexlayoutLinkElement.href =
-                "../../node_modules/flexlayout-react/style/dark.css";
+            if (mainLinkElement) mainLinkElement.href = "../eez-studio-ui/_stylesheets/main-dark.css";
+            if (flexlayoutLinkElement) flexlayoutLinkElement.href = "../../node_modules/flexlayout-react/style/dark.css";
         } else {
             document.body.parentElement?.setAttribute("data-bs-theme", "light");
-
-            mainLinkElement.href = "../eez-studio-ui/_stylesheets/main.css";
-
-            flexlayoutLinkElement.href =
-                "../../node_modules/flexlayout-react/style/light.css";
+            if (mainLinkElement) mainLinkElement.href = "../eez-studio-ui/_stylesheets/main.css";
+            if (flexlayoutLinkElement) flexlayoutLinkElement.href = "../../node_modules/flexlayout-react/style/light.css";
         }
 
         this.onThemeSwitchedTimeout = setTimeout(() => {
@@ -301,7 +294,7 @@ class SettingsController {
             }
 
             this.onThemeSwitchedTimeout = undefined;
-            content.style.opacity = "";
+            if (content) content.style.opacity = "";
         }, 50);
     }
 
@@ -326,7 +319,7 @@ class SettingsController {
     createNewDatabase = async () => {
         let defaultPath = window.localStorage.getItem("lastDatabaseSavePath");
 
-        const result = await getBridgeAPI().showSaveDialog({
+        const result = await dialog.showSaveDialog(getCurrentWindow(), {
             filters: [
                 { name: "DB files", extensions: ["db"] },
                 { name: "All Files", extensions: ["*"] }
@@ -334,7 +327,7 @@ class SettingsController {
             defaultPath: defaultPath ?? undefined
         });
 
-        const filePath = result;
+        const filePath = result.filePath;
 
         if (filePath) {
             try {
@@ -347,7 +340,7 @@ class SettingsController {
 
                     window.localStorage.setItem(
                         "lastDatabaseSavePath",
-                        dirname(filePath)
+                        path.dirname(filePath)
                     );
 
                     if (isActive) {
@@ -370,7 +363,7 @@ class SettingsController {
     openDatabase = async () => {
         let defaultPath = window.localStorage.getItem("lastDatabaseOpenPath");
 
-        const result = await getBridgeAPI().showOpenDialog({
+        const result = await dialog.showOpenDialog(getCurrentWindow(), {
             properties: ["openFile"],
             filters: [
                 { name: "DB files", extensions: ["db"] },
@@ -379,7 +372,7 @@ class SettingsController {
             defaultPath: defaultPath ?? undefined
         });
 
-        const filePaths = result;
+        const filePaths = result.filePaths;
 
         if (filePaths && filePaths[0]) {
             const filePath = filePaths[0];
@@ -389,7 +382,7 @@ class SettingsController {
 
                 window.localStorage.setItem(
                     "lastDatabaseOpenPath",
-                    dirname(filePath)
+                    path.dirname(filePath)
                 );
 
                 if (isActive) {
@@ -421,7 +414,8 @@ class SettingsController {
     };
 
     restart = () => {
-        location.reload();
+        app.relaunch();
+        app.exit();
     };
 
     setAsActiveDatabase = action(() => {
@@ -482,10 +476,7 @@ const CompactDatabaseDialog = observer(
                 sizeReduced: observable
             });
 
-            this.sizeBefore = 0;
-            getBridgeAPI().getFileSize(this.props.database.filePath).then(size => {
-                runInAction(() => { this.sizeBefore = size; });
-            });
+            this.sizeBefore = fs.statSync(this.props.database.filePath).size;
         }
 
         async componentDidMount() {
@@ -498,26 +489,26 @@ const CompactDatabaseDialog = observer(
                 });
 
                 runInAction(() => {
-                    getBridgeAPI().getFileSize(
+                    var fs = require("fs");
+
+                    this.sizeAfter = fs.statSync(
                         this.props.database.filePath
-                    ).then(fileSize => {
-                        runInAction(() => {
-                            this.sizeAfter = fileSize;
-                            this.props.database.databaseSize = this.sizeAfter!;
-                            this.sizeReduced =
-                                (100 * (this.sizeBefore - this.sizeAfter!)) /
-                                this.sizeBefore;
-                            if (this.sizeReduced < 1) {
-                                this.sizeReduced =
-                                    Math.round(100 * this.sizeReduced) / 100;
-                            } else if (this.sizeReduced < 10) {
-                                this.sizeReduced =
-                                    Math.round(10 * this.sizeReduced) / 10;
-                            } else {
-                                this.sizeReduced = Math.round(this.sizeReduced);
-                            }
-                        });
-                    });
+                    ).size;
+
+                    this.props.database.databaseSize = this.sizeAfter!;
+
+                    this.sizeReduced =
+                        (100 * (this.sizeBefore - this.sizeAfter!)) /
+                        this.sizeBefore;
+                    if (this.sizeReduced < 1) {
+                        this.sizeReduced =
+                            Math.round(100 * this.sizeReduced) / 100;
+                    } else if (this.sizeReduced < 10) {
+                        this.sizeReduced =
+                            Math.round(10 * this.sizeReduced) / 10;
+                    } else {
+                        this.sizeReduced = Math.round(this.sizeReduced);
+                    }
                 });
             } catch (err) {
                 notification.error(err);
@@ -591,7 +582,7 @@ const DatabaseListItem = observer(
                         }}
                     >
                         {database.isActive ? "[ACTIVE] " : ""}
-                        {basename(database.filePath)}
+                        {path.parse(database.filePath).name}
                     </td>
                 </tr>
             );
@@ -829,34 +820,23 @@ const PythonSettings = observer(
         constructor(props: any) {
             super(props);
 
-            // PythonShell is not available in browser — skip Python detection
-            if (typeof window !== "undefined" && !(window as any).require) {
-                this.pythonPathError = false;
-                this.pythonPath = "";
-            } else {
-                try {
-                    const { PythonShell } =
-                        require("python-shell") as typeof import("python-shell");
+            const { PythonShell } =
+                require("python-shell") as typeof import("python-shell");
 
-                    PythonShell.runString(
-                        "import sys;print(sys.executable)",
-                        undefined,
-                        action((err, output) => {
-                            if (err) {
-                                console.log(err);
-                                this.pythonPathError = true;
-                            } else if (!output) {
-                                this.pythonPathError = true;
-                            } else {
-                                this.pythonPath = output[0];
-                            }
-                        })
-                    );
-                } catch (e) {
-                    this.pythonPathError = false;
-                    this.pythonPath = "";
-                }
-            }
+            PythonShell.runString(
+                "import sys;print(sys.executable)",
+                undefined,
+                action((err, output) => {
+                    if (err) {
+                        console.log(err);
+                        this.pythonPathError = true;
+                    } else if (!output) {
+                        this.pythonPathError = true;
+                    } else {
+                        this.pythonPath = output[0];
+                    }
+                })
+            );
 
             makeObservable(this, {
                 pythonPath: observable,
@@ -921,12 +901,12 @@ class AbsoluteDirectoryInputProperty extends React.Component<
     {}
 > {
     onSelect = async () => {
-        const result = await getBridgeAPI().showOpenDialog({
+        const result = await dialog.showOpenDialog(getCurrentWindow(), {
             properties: ["openDirectory"]
         });
 
-        if (result && result[0]) {
-            this.props.onChange(result[0]);
+        if (result.filePaths && result.filePaths[0]) {
+            this.props.onChange(result.filePaths[0]);
         }
     };
 

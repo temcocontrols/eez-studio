@@ -2,7 +2,7 @@ import React from "react";
 import { action } from "mobx";
 import { observer } from "mobx-react";
 import * as FlexLayout from "flexlayout-react";
-import { isDev } from "eez-studio-shared/util-web";
+import { isDev } from "eez-studio-shared/util-electron";
 import { Loader } from "eez-studio-ui/loader";
 import { Tree } from "eez-studio-ui/tree";
 import { SearchInput } from "eez-studio-ui/search-input";

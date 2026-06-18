@@ -5,11 +5,13 @@ import {
     fileExists,
     readJsObjectFromFile,
     writeJsObjectToFile
-} from "eez-studio-shared/util-web";
+} from "eez-studio-shared/util-electron";
 
 import * as notification from "eez-studio-ui/notification";
 
 import { IExtension } from "eez-studio-shared/extensions/extension";
+
+import { getBridgeAPI } from "eez-studio-shared/bridge";
 
 export const DEFAULT_EXTENSIONS_CATALOG_VERSION_DOWNLOAD_URL =
     "https://github.com/eez-open/studio-extensions/raw/master/build/catalog-version.json";
@@ -88,6 +90,23 @@ class ExtensionsCatalog {
     }
 
     async checkNewVersionOfCatalog(forceDownload: boolean = false) {
+        // Browser: skip remote download, use local catalog if available
+        const bridge = getBridgeAPI();
+        if (bridge) {
+            if (forceDownload) {
+                try {
+                    const catalogVersion = await this.downloadCatalogVersion();
+                    if (catalogVersion) {
+                        runInAction(() => (this.catalogVersion = catalogVersion));
+                        this.downloadCatalog();
+                        return true;
+                    }
+                } catch {}
+                return false;
+            }
+            return false;
+        }
+
         try {
             const catalogVersion = await this.downloadCatalogVersion();
 
@@ -113,7 +132,22 @@ class ExtensionsCatalog {
         return true;
     }
 
-    downloadCatalogVersion() {
+    async downloadCatalogVersion(): Promise<ICatalogVersion> {
+        // Browser: use bridge proxy to avoid CORS
+        const bridge = getBridgeAPI();
+        if (bridge) {
+            try {
+                const text = await bridge.proxyFetch(DEFAULT_EXTENSIONS_CATALOG_VERSION_DOWNLOAD_URL);
+                const catalogVersion = JSON.parse(text);
+                catalogVersion.lastModified = new Date(catalogVersion.lastModified);
+                await writeJsObjectToFile(this.catalogVersionPath, catalogVersion);
+                return catalogVersion;
+            } catch (err) {
+                console.error("Failed to download catalog-version.json via bridge", err);
+                throw err;
+            }
+        }
+        // Electron: use XHR directly
         return new Promise<ICatalogVersion>((resolve, reject) => {
             var req = new XMLHttpRequest();
             req.responseType = "json";

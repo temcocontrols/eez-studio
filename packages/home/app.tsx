@@ -105,6 +105,12 @@ export const App = observer(
                         model={layoutModels.app}
                         factory={this.factory}
                         iconFactory={this.iconFactory}
+                        onRenderTab={(node, renderValues) => {
+                            const iconStr = node.getIcon();
+                            if (typeof iconStr === "string") {
+                                renderValues.leading = <Icon icon={iconStr} size={20} />;
+                            }
+                        }}
                     />
                 );
             }
@@ -127,11 +133,7 @@ const Tabs = observer(
 
         renderContent(item: IHomeTab) {
             this.renderedItems.add(item.id);
-            try {
-                const el = item.render();
-                if (!el || (typeof el === "object" && !el.type)) return null;
-                return el;
-            } catch { return null; }
+            return item.render();
         }
 
         renderContentIfRenderedBefore(item: IHomeTab) {

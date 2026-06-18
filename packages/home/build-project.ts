@@ -1,16 +1,12 @@
+import { ipcRenderer } from "electron";
 import { autorun } from "mobx";
 
 import { Message, ProjectStore, Section } from "project-editor/store";
 
 import { initProjectEditor } from "project-editor/project-editor-bootstrap";
-import { ipcRenderer } from "eez-studio-shared/ipc";
 
 export async function buildProject(filePath: string) {
-    const sendMessage = (msg: string | undefined) => {
-        ipcRenderer.send("on-build-project-message", msg);
-    };
-
-    sendMessage("Build project: " + filePath);
+    ipcRenderer.send("on-build-project-message", "Build project: " + filePath);
 
     try {
         await initProjectEditor(undefined, undefined as any);
@@ -33,7 +29,8 @@ export async function buildProject(filePath: string) {
                     if (messageIndex > lastMessageIndexDumped) {
                         lastMessageIndexDumped = messageIndex;
 
-                        sendMessage(
+                        ipcRenderer.send(
+                            "on-build-project-message",
                             indent + message.text
                         );
                     }
@@ -47,10 +44,11 @@ export async function buildProject(filePath: string) {
 
         await projectStore.build();
     } catch (err) {
-        sendMessage(
+        ipcRenderer.send(
+            "on-build-project-message",
             "Unhandled error: " + err.toString()
         );
     }
 
-    sendMessage(undefined);
+    ipcRenderer.send("on-build-project-message", undefined);
 }
