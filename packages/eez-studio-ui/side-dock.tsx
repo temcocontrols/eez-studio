@@ -11,6 +11,7 @@ import {
     Body
 } from "eez-studio-ui/header-with-body";
 import { FlexLayoutContainer } from "eez-studio-ui/FlexLayout";
+import { Icon } from "eez-studio-ui/icon";
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -21,6 +22,7 @@ export class SideDockComponent2 extends React.Component<{
     factory: (node: FlexLayout.TabNode) => React.ReactNode;
     header?: JSX.Element;
     width: number;
+    iconFactory?: (node: FlexLayout.TabNode) => React.ReactNode;
 }> {
     static defaultProps = { width: 240 };
 
@@ -68,6 +70,16 @@ export class SideDockComponent2 extends React.Component<{
                 <FlexLayoutContainer
                     model={this.props.flexLayoutModel}
                     factory={this.props.factory}
+                    onRenderTab={(node, renderValues) => {
+                        const iconStr = node.getIcon();
+                        if (typeof iconStr === "string") {
+                            renderValues.leading = <Icon icon={iconStr} size={20} />;
+                        }
+                        if (this.props.iconFactory) {
+                            const custom = this.props.iconFactory(node);
+                            if (custom) renderValues.leading = custom;
+                        }
+                    }}
                 />
             );
 

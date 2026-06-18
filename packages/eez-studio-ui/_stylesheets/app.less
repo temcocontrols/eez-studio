@@ -1,7 +1,7 @@
-@import "./quill.less";
-@import "./animate.less";
-@import "react-toastify/dist/ReactToastify.css";
-@import "tabulator-tables/dist/css/tabulator.min.css";
+@import "quill.less";
+@import "animate.less";
+@import "../../../../../node_modules/react-toastify/dist/ReactToastify.css";
+@import "../../../../../node_modules/tabulator-tables/dist/css/tabulator.min.css";
 
 @font-face {
     font-family: "EEZ Studio Font";
@@ -622,11 +622,11 @@ button.EezStudio_Action {
     background-position: center center;
 
     &.EezStudio_Splitter_Horizontal {
-        background-image: url(../_images/splitter_horizontal_thumb.png);
+        background-image: url("../_images/splitter_horizontal_thumb.png");
     }
 
     &.EezStudio_Splitter_Vertical {
-        background-image: url(../_images/splitter_vertical_thumb.png);
+        background-image: url("../_images/splitter_vertical_thumb.png");
     }
 
     &:hover {
@@ -1461,13 +1461,13 @@ button.EezStudio_Action {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-@import "home";
+@import "home.less";
 
-@import "instrument";
-@import "BB3";
+@import "instrument.less";
+@import "BB3.less";
 
-@import "project-editor";
+@import "project-editor.less";
 
-@import "component-doc";
+@import "component-doc.less";
 
-@import "documentation-browser";
+@import "documentation-browser.less";
