@@ -410,6 +410,8 @@ export function registerSystemEnum({
     projectTypes: ProjectType[] | undefined;
     lvglVersions?: LVGLVersion[];
 }) {
+    // Guard against ESM circular dependency TDZ
+    if (typeof SystemEnum === "undefined") return;
     const existingSystemEnum = SystemEnum.SYSTEM_ENUMS.find(
         systemEnum => systemEnum.compareTo(name, projectTypes, lvglVersions)
     );

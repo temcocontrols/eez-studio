@@ -875,6 +875,7 @@ export class Page extends Flow {
 
     get isRuntimeSelectedPage() {
         const projectStore = getProjectStore(this);
+        if (!projectStore) return false;
         return (
             !projectStore.projectTypeTraits.isDashboard &&
             projectStore.runtime &&

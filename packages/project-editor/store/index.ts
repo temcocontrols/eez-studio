@@ -415,9 +415,7 @@ export class ProjectStore {
     }
 
     onDeactivate() {
-        const Mousetrap = require("mousetrap") as typeof MousetrapModule;
-
-        Mousetrap.reset();
+        // Skip Mousetrap in browser
     }
 
     unmount() {

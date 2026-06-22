@@ -707,10 +707,10 @@ export async function build(
         ) {
             const currentFiles = Array.from(currentBuildFiles);
 
-            if (previousManifest && previousManifest.files.length > 0) {
+            if (previousManifest?.files?.length > 0) {
                 await deleteOrphanedFiles(
                     destinationFolderPath,
-                    previousManifest.files,
+                    previousManifest!.files,
                     currentFiles,
                     OutputSections
                 );

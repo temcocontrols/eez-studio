@@ -279,24 +279,16 @@ const Content = observer(
             }
 
             if (component === "dockerSimulatorPreview") {
-                const {
-                    DockerSimulatorPreviewPanel
-                } = require("project-editor/lvgl/docker-build/DockerSimulatorPreviewPanel");
-                return <DockerSimulatorPreviewPanel />;
+                // Docker panels not available in browser
+                return null;
             }
 
             if (component === "dockerSimulatorLogs") {
-                const {
-                    DockerSimulatorLogsPanel
-                } = require("project-editor/lvgl/docker-build/DockerSimulatorLogsPanel");
-                return <DockerSimulatorLogsPanel />;
+                return null;
             }
 
             if (component === "dockerSimulatorPreviewLogs") {
-                const {
-                    PreviewLogsPanel
-                } = require("project-editor/lvgl/docker-build/PreviewLogsPanel");
-                return <PreviewLogsPanel />;
+                return null;
             }
 
             return null;

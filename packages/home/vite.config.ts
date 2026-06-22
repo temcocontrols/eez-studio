@@ -82,7 +82,7 @@ export default defineConfig({
 
     // Prevent Vite from trying to optimize Node builtins
     optimizeDeps: {
-        exclude: ["fs", "fs/promises", "path", "electron"]
+        exclude: ["fs", "fs/promises", "path", "electron", "buffer"]
     },
 
     ssr: {

@@ -999,6 +999,7 @@ export function isObjectReferencable(object: IEezObject) {
 
 export function isLVGLCreateInProgress(flow: Flow) {
     const projectStore = getProjectStore(flow);
+    if (!projectStore) return false;
 
     return (
         projectStore.projectTypeTraits.isLVGL &&

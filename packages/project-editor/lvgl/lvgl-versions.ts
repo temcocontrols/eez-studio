@@ -469,10 +469,44 @@ export function getLvglWasmFlowRuntimeConstructor(
         // WASM runtime not available in browser — dummy Proxy catches all method calls
         wasmFlowRuntimeConstructor = (callback: any) => {
             let nextId = 1;
+            // Create fake WASM memory heap (typed arrays) — auto-resize
+            let heapBuffer = new ArrayBuffer(1048576); // 1MB
+            const HEAPU8 = new Uint8Array(heapBuffer);
+            const HEAPU32 = new Uint32Array(heapBuffer);
+            // Wrapper that auto-resizes heap when set() overflow
+            function makeHeap(cons: any) {
+                const arr = new cons(heapBuffer);
+                const origSet = arr.set.bind(arr);
+                arr.set = (source: any, offset?: number) => {
+                    const needed = (offset || 0) + source.length;
+                    if (needed > arr.length) {
+                        const newSize = Math.max(needed * cons.BYTES_PER_ELEMENT, heapBuffer.byteLength * 2);
+                        const newBuf = new ArrayBuffer(newSize);
+                        new Uint8Array(newBuf).set(new Uint8Array(heapBuffer));
+                        heapBuffer = newBuf;
+                        // Update all heap views
+                        Object.assign(HEAPU8, new Uint8Array(heapBuffer));
+                        Object.assign(HEAPU32, new Uint32Array(heapBuffer));
+                        const newArr = new cons(heapBuffer);
+                        newArr.set(source, offset);
+                        return;
+                    }
+                    origSet(source, offset);
+                };
+                return arr;
+            }
+            const HEAP = { HEAPU8: makeHeap(Uint8Array), HEAPU32: makeHeap(Uint32Array) };
             const wasm = new Proxy({} as any, {
-                get(_target, prop: string) {
+                get(_target, prop: string | symbol) {
+                    if (typeof prop === "symbol") return undefined;
                     if (prop === "then") return undefined;
-                    // Return incrementing ID for create methods so each widget gets a unique _lvglObj
+                    // WASM memory heap
+                    if (prop === "HEAPU8") return HEAP.HEAPU8;
+                    if (prop === "HEAPU32") return HEAP.HEAPU32;
+                    if (prop.startsWith("HEAP")) return HEAP.HEAPU8;
+                    if (prop === "_malloc") return () => nextId++ * 1024;
+                    if (prop === "_free") return () => {};
+                    // Return incrementing ID for create methods
                     if (prop.startsWith("_lvglCreate") || prop.startsWith("_create") || prop === "_mainLoop") {
                         return () => nextId++;
                     }

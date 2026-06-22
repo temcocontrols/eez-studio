@@ -1,4 +1,6 @@
 /// <reference path="./globals.d.ts"/>
+// Ensure Buffer is available globally before any other imports
+import "buffer";
 import * as bootstrap from "bootstrap";
 (window as any).bootstrap = bootstrap;
 import "bootstrap/dist/css/bootstrap.min.css";
