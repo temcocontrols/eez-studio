@@ -261,9 +261,10 @@ class SettingsController {
         const content = document.getElementById(
             "EezStudio_Content"
         ) as HTMLDivElement;
-        if (content) {
-            content.style.opacity = "0";
+        if (!content) {
+            return;
         }
+        content.style.opacity = "0";
 
         const body = document.querySelector("#EezStudio_Content>.EezStudio_HeaderWithBody>.EezStudio_Body");
         if (body && body instanceof HTMLDivElement && body.style) {
@@ -280,12 +281,27 @@ class SettingsController {
 
         if (this.isDarkTheme) {
             document.body.parentElement?.setAttribute("data-bs-theme", "dark");
-            if (mainLinkElement) mainLinkElement.href = "../eez-studio-ui/_stylesheets/main-dark.css";
-            if (flexlayoutLinkElement) flexlayoutLinkElement.href = "../../node_modules/flexlayout-react/style/dark.css";
+
+            if (mainLinkElement) {
+                mainLinkElement.href =
+                    "../eez-studio-ui/_stylesheets/main-dark.css";
+            }
+
+            if (flexlayoutLinkElement) {
+                flexlayoutLinkElement.href =
+                    "../../node_modules/flexlayout-react/style/dark.css";
+            }
         } else {
             document.body.parentElement?.setAttribute("data-bs-theme", "light");
-            if (mainLinkElement) mainLinkElement.href = "../eez-studio-ui/_stylesheets/main.css";
-            if (flexlayoutLinkElement) flexlayoutLinkElement.href = "../../node_modules/flexlayout-react/style/light.css";
+
+            if (mainLinkElement) {
+                mainLinkElement.href = "../eez-studio-ui/_stylesheets/main.css";
+            }
+
+            if (flexlayoutLinkElement) {
+                flexlayoutLinkElement.href =
+                    "../../node_modules/flexlayout-react/style/light.css";
+            }
         }
 
         this.onThemeSwitchedTimeout = setTimeout(() => {
@@ -294,7 +310,7 @@ class SettingsController {
             }
 
             this.onThemeSwitchedTimeout = undefined;
-            if (content) content.style.opacity = "";
+            content.style.opacity = "";
         }, 50);
     }
 

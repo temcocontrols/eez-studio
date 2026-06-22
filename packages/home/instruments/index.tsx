@@ -261,9 +261,9 @@ function openEditor(
 
 ////////////////////////////////////////////////////////////////////////////////
 
-window.addEventListener("message", (message: any) => {
+window.addEventListener("message", async (message: any) => {
     const { instruments } =
-        require("instrument/instrument-object") as typeof import("instrument/instrument-object");
+        await import("instrument/instrument-object");
     for (let key of instruments.keys()) {
         const instrument = instruments.get(key);
         if (instrument && instrument.id === message.data.instrumentId) {

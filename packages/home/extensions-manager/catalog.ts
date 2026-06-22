@@ -11,8 +11,6 @@ import * as notification from "eez-studio-ui/notification";
 
 import { IExtension } from "eez-studio-shared/extensions/extension";
 
-import { getBridgeAPI } from "eez-studio-shared/bridge";
-
 export const DEFAULT_EXTENSIONS_CATALOG_VERSION_DOWNLOAD_URL =
     "https://github.com/eez-open/studio-extensions/raw/master/build/catalog-version.json";
 
@@ -90,23 +88,6 @@ class ExtensionsCatalog {
     }
 
     async checkNewVersionOfCatalog(forceDownload: boolean = false) {
-        // Browser: skip remote download, use local catalog if available
-        const bridge = getBridgeAPI();
-        if (bridge) {
-            if (forceDownload) {
-                try {
-                    const catalogVersion = await this.downloadCatalogVersion();
-                    if (catalogVersion) {
-                        runInAction(() => (this.catalogVersion = catalogVersion));
-                        this.downloadCatalog();
-                        return true;
-                    }
-                } catch {}
-                return false;
-            }
-            return false;
-        }
-
         try {
             const catalogVersion = await this.downloadCatalogVersion();
 
@@ -132,100 +113,13 @@ class ExtensionsCatalog {
         return true;
     }
 
-    async downloadCatalogVersion(): Promise<ICatalogVersion> {
-        // Browser: use bridge proxy to avoid CORS
-        const bridge = getBridgeAPI();
-        if (bridge) {
-            try {
-                const text = await bridge.proxyFetch(DEFAULT_EXTENSIONS_CATALOG_VERSION_DOWNLOAD_URL);
-                const catalogVersion = JSON.parse(text);
-                catalogVersion.lastModified = new Date(catalogVersion.lastModified);
-                await writeJsObjectToFile(this.catalogVersionPath, catalogVersion);
-                return catalogVersion;
-            } catch (err) {
-                console.error("Failed to download catalog-version.json via bridge", err);
-                throw err;
-            }
-        }
-        // Electron: use XHR directly
-        return new Promise<ICatalogVersion>((resolve, reject) => {
-            var req = new XMLHttpRequest();
-            req.responseType = "json";
-            req.open("GET", DEFAULT_EXTENSIONS_CATALOG_VERSION_DOWNLOAD_URL);
-
-            req.addEventListener("load", async () => {
-                const catalogVersion = req.response;
-                catalogVersion.lastModified = new Date(
-                    catalogVersion.lastModified
-                );
-                await writeJsObjectToFile(
-                    this.catalogVersionPath,
-                    catalogVersion
-                );
-                resolve(catalogVersion);
-            });
-
-            req.addEventListener("error", error => {
-                console.error(
-                    "Failed to download catalog-version.json for extensions",
-                    error
-                );
-                reject(error);
-            });
-
-            req.send();
-        });
+    downloadCatalogVersion() {
+        // Hardcoded: skip network request (CORS blocked in browser)
+        return Promise.resolve({ lastModified: new Date(0) } as ICatalogVersion);
     }
 
     downloadCatalog() {
-        var req = new XMLHttpRequest();
-        req.responseType = "arraybuffer";
-        req.open("GET", DEFAULT_EXTENSIONS_CATALOG_DOWNLOAD_URL);
-
-        const progressToastId = notification.info(
-            "Downloading extensions catalog ...",
-            {
-                autoClose: false,
-                hideProgressBar: false
-            }
-        );
-
-        req.addEventListener("progress", event => {
-            notification.update(progressToastId, {
-                render: event.total
-                    ? `Downloading extensions catalog: ${event.loaded} of ${event.total}`
-                    : `Downloading extensions catalog: ${event.loaded}`
-            });
-        });
-
-        req.addEventListener("load", async () => {
-            const decompress = require("decompress");
-
-            const files = await decompress(Buffer.from(req.response));
-
-            const catalog = JSON.parse(files[0].data);
-
-            runInAction(() => (this.catalog = catalog));
-
-            await writeJsObjectToFile(this.catalogPath, this.catalog);
-
-            notification.update(progressToastId, {
-                type: notification.SUCCESS,
-                render: `The latest extensions catalog successfully downloaded.`,
-                autoClose: 5000
-            });
-        });
-
-        req.addEventListener("error", error => {
-            console.error("ExtensionsCatalog download error", error);
-            notification.update(progressToastId, {
-                type: notification.ERROR,
-                render: `Failed to download extensions catalog.`,
-                autoClose: 5000
-            });
-        });
-
-        req.send();
+        // Hardcoded: skip network request (CORS blocked in browser)
     }
 }
 

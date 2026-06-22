@@ -1,13 +1,21 @@
 /// <reference path="./globals.d.ts"/>
-import "bootstrap";
+import * as bootstrap from "bootstrap";
+(window as any).bootstrap = bootstrap;
+import "bootstrap/dist/css/bootstrap.min.css";
+
 import { ipcRenderer } from "electron";
 import React from "react";
 import { createRoot } from "react-dom/client";
 import { configure } from "mobx";
 import { observer } from "mobx-react";
+import "../eez-studio-ui/_stylesheets/main.less";
+import "flexlayout-react/style/light.css";
+// import { loadExtensions } from "eez-studio-shared/extensions/extensions";
+// import { getNodeModuleFolders } from "eez-studio-shared/extensions/yarn";
 
-import { loadExtensions } from "eez-studio-shared/extensions/extensions";
-import { getNodeModuleFolders } from "eez-studio-shared/extensions/yarn";
+// Browser version: disable extension scanning
+const loadExtensions = () => {};
+const getNodeModuleFolders = () => [];
 
 import * as notification from "eez-studio-ui/notification";
 import { showAboutBox } from "eez-studio-ui/about-box";
@@ -161,6 +169,8 @@ async function main() {
     const params = new URLSearchParams(location.search);
     const buildProject = params.get("build-project") === "1";
 
+    console.info("Starting Eez Studio...");
+
     let nodeModuleFolders: string[];
     try {
         nodeModuleFolders = await getNodeModuleFolders();
@@ -189,10 +199,14 @@ async function main() {
 
     ipcRenderer.send("open-command-line-project");
 
-    // Browser polyfill: listen for project-open events from the electron-kitchen stub
-    window.addEventListener("eez-open-project", ((e: CustomEvent) => {
-        openProject(e.detail, false);
-    }) as EventListener);
+        //
+    // 7. 🔥 ALWAYS OPEN DEVTOOLS FOR DEBUGGING
+    //
+    try {
+        ipcRenderer.send("open-devtools");
+    } catch (err) {
+        console.warn("DevTools could not be opened:", err);
+    }
 }
 
 main();

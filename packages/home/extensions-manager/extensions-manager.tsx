@@ -13,7 +13,7 @@ import { observer } from "mobx-react";
 import classNames from "classnames";
 import * as FlexLayout from "flexlayout-react";
 
-var sha256 = require("sha256");
+import sha256 from "sha256";
 
 import { compareVersions, studioVersion } from "eez-studio-shared/util";
 import { humanize } from "eez-studio-shared/string";

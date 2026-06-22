@@ -4,5 +4,13 @@
     "author": "Envox",
     "eez-studio": {
         "main": "home-extension.js"
+    },
+    "scripts": {
+        "dev": "vite"
+    },
+    "devDependencies": {
+        "@vitejs/plugin-react": "^6.0.2",
+        "less": "^4.6.6",
+        "vite": "^8.0.16"
     }
 }

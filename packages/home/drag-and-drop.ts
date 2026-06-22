@@ -15,11 +15,10 @@ export function handleDragAndDrop() {
         }
     }
 
-    $(document).on("dragover", $ev => {
-        const ev = $ev.originalEvent as DragEvent;
+    document.addEventListener("dragover", (ev: DragEvent) => {
         if (ev.dataTransfer) {
             if (ev.dataTransfer.files.length > 0) {
-                $ev.preventDefault();
+                ev.preventDefault();
                 ev.dataTransfer.dropEffect = "copy";
             } else {
                 ev.dataTransfer.dropEffect = "none";
@@ -27,11 +26,10 @@ export function handleDragAndDrop() {
         }
     });
 
-    $(document).on("drop", async $ev => {
-        const ev = $ev.originalEvent as DragEvent;
+    document.addEventListener("drop", async (ev: DragEvent) => {
         const dt = ev.dataTransfer;
         if (dt && dt.files.length > 0) {
-            $ev.preventDefault();
+            ev.preventDefault();
 
             const files = dt.files;
 
