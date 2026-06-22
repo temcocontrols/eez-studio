@@ -166,7 +166,11 @@ export async function delay(time: number) {
     return new Promise(resolve => setTimeout(resolve, time));
 }
 
-export const studioVersion = require("../../package.json").version;
+// export const studioVersion = require("../../package.json").version;
+
+import pkg from "../../package.json";
+export const studioVersion = pkg.version;
+
 
 export function compareVersions(v1: string, v2: string) {
     const v1Parts = v1.toString().split(".");
@@ -216,12 +220,6 @@ export function remap(
 }
 
 export function sourceRootDir() {
-    // Browser: __dirname is "/" so "/.." would resolve to filesystem root,
-    // causing readFolder to list the Rust project directory (hundreds of entries).
-    // Return a safe empty path inside the bridge data space instead.
-    if (typeof process === "undefined" || !!(process as any).type) {
-        return "/eez-user-data/_preinstalled";
-    }
     return __dirname + "/..";
 }
 
