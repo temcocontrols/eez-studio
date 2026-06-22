@@ -1,5 +1,28 @@
-const _parse = (_expr: string) => { throw new Error("Grammar not available in browser"); };
-const peggyParser = { parse: _parse };
+import { readFileSync } from "fs";
+import { resolve } from "path";
+import peggy from "peggy";
+
+import { isDev } from "eez-studio-shared/util-electron";
+import { sourceRootDir } from "eez-studio-shared/util";
+
+// Vite handles ?raw imports; in Node.js/Electron, falls back to readFileSync
+let expressionParserGrammar: string;
+try {
+    const mod = await import("../../../../resources/expression-grammar.pegjs?raw");
+    expressionParserGrammar = (mod as any).default;
+} catch {
+    expressionParserGrammar = readFileSync(
+        isDev
+            ? resolve(`${sourceRootDir()}/../resources/expression-grammar.pegjs`)
+            : process.resourcesPath! + "/expression-grammar.pegjs",
+        "utf8"
+    );
+}
+
+const peggyParser = peggy.generate(expressionParserGrammar, {
+    cache: true,
+    optimize: "speed"
+});
 
 const cache = new Map<string, any>();
 
@@ -22,4 +45,7 @@ export const expressionParser = {
     }
 };
 
-export const identifierParser = { parse: _parse };
+export const identifierParser = peggy.generate(expressionParserGrammar, {
+    allowedStartRules: ["Identifier"],
+    cache: true
+});

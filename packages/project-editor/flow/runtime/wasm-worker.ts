@@ -26,7 +26,10 @@ import { runInAction } from "mobx";
 import deepEqual from "fast-deep-equal";
 import { LVGLVersion } from "project-editor/project/project";
 
-const eez_flow_runtime_constructor = require("project-editor/flow/runtime/wasm/eez_runtime.js");
+let eez_flow_runtime_constructor: any;
+import("project-editor/flow/runtime/wasm/eez_runtime.js").then(m => {
+    eez_flow_runtime_constructor = m.default || m;
+});
 
 ////////////////////////////////////////////////////////////////////////////////
 

@@ -1,6 +1,6 @@
 import { dialog, getCurrentWindow } from "@electron/remote";
 import fs from "fs";
-import { rmdir } from "fs/promises";
+// import { rmdir } from "fs/promises";
 import path from "path";
 import React from "react";
 import ReactDOM from "react-dom";
@@ -24,7 +24,6 @@ import {
     getHomePath,
     readJsObjectFromFile
 } from "eez-studio-shared/util-electron";
-import { getBridgeAPI } from "eez-studio-shared/bridge";
 import { guid } from "eez-studio-shared/guid";
 import { stringCompare } from "eez-studio-shared/string";
 
@@ -424,20 +423,10 @@ export class WizardModel {
     }
 
     async fetchTemplateProjects() {
-        const bridgeAPI = getBridgeAPI();
-
-        const proxiedFetchJson = async (url: string): Promise<any> => {
-            if (bridgeAPI) {
-                const text = await bridgeAPI.proxyFetch(url);
-                return JSON.parse(text);
-            }
-            const response = await fetch(url);
-            return response.json();
-        };
-
-        const data = await proxiedFetchJson(
+        const result = await fetch(
             "https://envox.eu/gitea/api/v1/repos/search?q=eez-flow-template&topic=true"
         );
+        const data = await result.json();
         const templateProjects = data.data.map(
             (templateProject: TemplateProject) =>
                 Object.assign({}, templateProject, {
@@ -461,11 +450,9 @@ export class WizardModel {
                     templateProject.html_url +
                     "/raw/branch/master/template/manifest.json";
 
-                const manifestJson = await proxiedFetchJson(manifestJsonUrl);
-
-                if (!manifestJson || !manifestJson["eez-project-path"]) {
-                    continue;
-                }
+                const manifestJson = await (
+                    await fetch(manifestJsonUrl)
+                ).json();
 
                 const eezProjectUrl =
                     templateProject.html_url +
@@ -475,7 +462,9 @@ export class WizardModel {
                         templateProject.name
                     );
 
-                const eezProjectJson = await proxiedFetchJson(eezProjectUrl);
+                const eezProjectJson = await (
+                    await fetch(eezProjectUrl, { cache: "no-store" })
+                ).json();
 
                 const general = eezProjectJson.settings?.general;
 
@@ -562,7 +551,7 @@ export class WizardModel {
 
         const packageJSON: {
             version: string;
-        } = require("../../../../package.json");
+        } = { version: "0.0.0" };
 
         const examples = examplesCatalog.catalog
             .slice()
@@ -1358,7 +1347,7 @@ export class WizardModel {
                             ) {
                                 return false;
                             }
-                            await rmdir(projectDirPath, { recursive: true });
+                            // await rmdir(projectDirPath, { recursive: true });
                         }
                     }
 
@@ -1633,8 +1622,10 @@ export class WizardModel {
                     }
 
                     // set projectVersion
-                    projectTemplate.settings.general.projectVersion =
-                        this.type == "resource" ? this.projectVersion : "v3";
+                    if (projectTemplate) {
+                        projectTemplate.settings.general.projectVersion =
+                            this.type == "resource" ? this.projectVersion : "v3";
+                    }
 
                     if (this.type == "applet" || this.type == "resource") {
                         // set masterProject

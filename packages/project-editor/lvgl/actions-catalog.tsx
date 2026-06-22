@@ -13,6 +13,9 @@ import type { Project } from "project-editor/project/project";
 
 ////////////////////////////////////////////////////////////////////////////////
 
+// Defer all registrations to break ESM circular dependency (avoids TDZ)
+setTimeout(() => {
+
 registerAction({
     id: 0,
     name: "changeScreen",
@@ -1928,3 +1931,5 @@ registerAction({
     label: animLabel,
     helpText: "Animate the angle of the image"
 });
+
+}, 0);

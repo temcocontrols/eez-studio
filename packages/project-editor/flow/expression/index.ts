@@ -11,7 +11,10 @@ export {
     buildAssignableExpression
 } from "project-editor/flow/expression/build";
 
+export type { IExpressionContext } from "project-editor/flow/expression/eval";
+
 export {
+    //IExpressionContext,
     evalConstantExpression,
     evalExpression,
     evalExpressionGetValueType,

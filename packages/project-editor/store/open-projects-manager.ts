@@ -282,7 +282,7 @@ export class OpenProjectsManager {
     }
 
     async _loadProject(filePath: string) {
-        console.log("loadProject", filePath);
+        console.log("_loadProject START:", filePath);
 
         let fileData: Buffer;
 
@@ -327,6 +327,8 @@ export class OpenProjectsManager {
         ) as Project;
 
         project._isDashboardBuild = isDashboardBuild;
+
+        console.log('the project is', project);
 
         return project;
     }

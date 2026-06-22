@@ -1,5 +1,5 @@
 import fs from "fs";
-import bootstrap from "bootstrap";
+import "bootstrap";
 import React from "react";
 import { createRoot } from "react-dom/client";
 import {

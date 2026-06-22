@@ -1,6 +1,13 @@
 import React from "react";
 import { computed, makeObservable, observable, runInAction } from "mobx";
 
+// Using var (not const) to allow lazy init during ESM circular dependency resolution.
+// var has no TDZ — accessed before assignment returns undefined.
+export var actionDefinitions: IActionDefinition[] = undefined as any;
+var actionClasses = new Map<string, typeof LVGLActionType>();
+var actionNameToActionId = new Map<string, number>();
+var actionIdToActionName = new Map<number, string>();
+
 import {
     registerClass,
     makeDerivedClassInfo,
@@ -141,11 +148,6 @@ export interface IActionDefinition {
     disabled?: (project: Project) => string | false;
 }
 
-export const actionDefinitions: IActionDefinition[] = [];
-const actionClasses = new Map<string, typeof LVGLActionType>();
-const actionNameToActionId = new Map<string, number>();
-const actionIdToActionName = new Map<number, string>();
-
 function getActionDisplayName(actionDefinition: IActionDefinition) {
     return (actionDefinition.displayName || humanize(actionDefinition.name))
         .split(" ")
@@ -210,6 +212,9 @@ function getStyleProperty(actionType: LVGLActionType) {
 }
 
 export function registerAction(actionDefinition: IActionDefinition) {
+    if (!actionDefinitions) actionDefinitions = [];
+    if (!actionNameToActionId) actionNameToActionId = new Map();
+    if (!actionIdToActionName) actionIdToActionName = new Map();
     actionDefinitions.push(actionDefinition);
 
     if (actionNameToActionId.has(actionDefinition.name)) {
@@ -1746,10 +1751,10 @@ export function generateLVGLActionsMarkdown() {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-// Dynamic import avoids circular dependency: actionDefinitions must be initialized first
-import("./actions-catalog");
+import "./actions-catalog";
 
 /*
+
 ////////////////////////////////////////////////////////////////////////////////
 
 const LVGL_ACTIONS = {

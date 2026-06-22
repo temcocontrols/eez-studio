@@ -18,9 +18,9 @@ import {
 } from "project-editor/flow/expression/node";
 import { checkArity } from "project-editor/flow/expression/type";
 import {
-    ExpressionEvalError
+    ExpressionEvalError,
+    IExpressionContext
 } from "project-editor/flow/expression";
-import type { IExpressionContext } from "project-editor/flow/expression/eval";
 
 import {
     binaryOperators,
@@ -30,7 +30,8 @@ import {
     unaryOperators
 } from "project-editor/flow/expression/operations";
 
-export { IExpressionContext };
+// export { IExpressionContext };
+export type { IExpressionContext } from "project-editor/flow/expression/eval";
 
 export function buildExpression(
     project: Project,

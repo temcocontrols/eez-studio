@@ -301,7 +301,8 @@ export class ProjectStore {
     }
 
     onActivate() {
-        const Mousetrap = require("mousetrap") as typeof MousetrapModule;
+        // Skip Mousetrap in browser — keyboard shortcuts via iframe not available
+        return;
 
         Mousetrap.reset();
 
