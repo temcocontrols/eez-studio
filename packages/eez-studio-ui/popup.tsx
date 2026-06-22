@@ -1,4 +1,4 @@
-import bootstrap from "bootstrap";
+import "bootstrap";
 import { createRoot } from "react-dom/client";
 
 export function showPopup(targetElement: Element, popupElement: JSX.Element) {

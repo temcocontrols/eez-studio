@@ -1,6 +1,6 @@
 import { dialog, getCurrentWindow } from "@electron/remote";
 import { clipboard, SaveDialogOptions } from "electron";
-import bootstrap from "bootstrap";
+import "bootstrap";
 import React from "react";
 import { createRoot } from "react-dom/client";
 import {
