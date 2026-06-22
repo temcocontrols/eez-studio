@@ -1,4 +1,4 @@
-import "./fix-path";
+ import "./fix-path";
 
 import {
     app,
@@ -31,9 +31,16 @@ contextMenu({
 
 app.commandLine.appendSwitch("disable-renderer-backgrounding");
 
-// app.allowRendererProcessReuse = false;
-
 let homeWindow: BrowserWindow;
+
+//
+// 🔥 Add IPC handler so renderer can request DevTools
+//
+ipcMain.on("open-devtools", () => {
+    if (homeWindow) {
+        homeWindow.webContents.openDevTools({ mode: "detach" });
+    }
+});
 
 app.on("ready", async function () {
     let buildProjectFilePath;
@@ -60,18 +67,25 @@ app.on("ready", async function () {
         openFile(commandLine[commandLine.length - 1]);
     });
 
-    // start with:
-    // react devtools: npm start devToolsExtension="C:\Users\mvladic\AppData\Local\Google\Chrome\User Data\Default\Extensions\fmkadmapgofadopljbjfkapdkoienihi\4.10.1_0"
-    // mobx devtools: npm start devToolsExtension="C:\Users\mvladic\AppData\Local\Google\Chrome\User Data\Default\Extensions\pfgnfdagidkfgccljigdamigbcnndkod\0.9.26_0"
+    //
+    // 🔥 Improved DevTools extension loader with logging
+    //
     if (
         process.argv.length > 2 &&
         process.argv[2].startsWith("devToolsExtension=")
     ) {
-        await app.whenReady();
-        await session.defaultSession.loadExtension(
-            process.argv[2].substr("devToolsExtension=".length),
-            { allowFileAccess: true }
-        );
+        const extPath = process.argv[2].substring("devToolsExtension=".length);
+        console.log("🔧 Loading DevTools extension:", extPath);
+
+        try {
+            await app.whenReady();
+            const ext = await session.defaultSession.loadExtension(extPath, {
+                allowFileAccess: true
+            });
+            console.log("✅ DevTools extension loaded:", ext.name);
+        } catch (err) {
+            console.error("❌ Failed to load DevTools extension:", err);
+        }
     }
 
     const { loadSettings } = await import("main/settings");
@@ -92,6 +106,11 @@ app.on("ready", async function () {
     } else {
         homeWindow = openHomeWindow();
     }
+
+    //
+    // 🔥 Always open DevTools for debugging
+    //
+    homeWindow.webContents.openDevTools({ mode: "detach" });
 
     await import("main/menu");
 });
